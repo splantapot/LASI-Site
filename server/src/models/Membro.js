@@ -8,24 +8,17 @@ class Membro extends BaseModel {
     static FIELDS = [
         'nome', 'data_nascimento', 'foto', 'cargo', 'departamento', 'destacar', 'media'
     ];
-    static CONFIG = {bool: ['destacar']}
+    static CONFIG = { bool: ['destacar'], joinAt: ['media'] }
 
     constructor(object = {}) {
         super(object, Membro.FIELDS, Membro.CONFIG);
     }
 
     static async fromSheet() {
-        const data = await super.fromSheet(MEMBROS_SHEET_ID, ['Dados', 'Media']);
-        const media = formatMediaSheet(data[1]);
-        const members = [];
-        data[0].slice(2).forEach((row, ix) => {
-            const newMember = super.fromArray(row, Membro.FIELDS, Membro.CONFIG);
-            newMember['media'] = media[ix];
-            members.push(newMember);
-        });
-
-        console.log(members);
-        return;
+        const response = await super.fromSheet(MEMBROS_SHEET_ID, ['Dados', 'Media']);
+        const sheetDados = response[0].slice(2) || [];
+        const sheetMedia = formatMediaSheet(response[1]) || [];
+        return super.fromCombinedRows(sheetDados, Membro.FIELDS, Membro.CONFIG, sheetMedia) || [];
     }
 }
 

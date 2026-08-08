@@ -37,13 +37,39 @@ class BaseModel {
         return { ...this };
     }
 
-    static fromArray(array, fields, config = {split: undefined, bool: undefined}) {
+    static fromRow(row = [], fields = [], config = {}) {
         const newObj = {}
         fields.forEach((field, i) => {
-            const value = i < array.length? array[i] : undefined;
+            const value = i < row.length? row[i] : undefined;
             if (value) newObj[field] = value;
         });
         return new this(newObj, fields, config);
+    }
+
+    static fromRows(rows = [], fields = [], config = {}) {
+        return rows.map((row) => this.fromRow(row, fields, config));
+    }
+
+    static fromCombinedRows(rows = [], fields = [], config = {joinAt: []}, ...listsToCombine) {
+        // Use the "joinAt" prop. of config to set how many fields should be combined.
+
+        // Accepts only array
+        if (listsToCombine.find((elm) => !Array.isArray(elm))){
+            throw("Error: 'listsToCombine' hasn't only arrays.");
+        }
+        
+        let list = 0;
+        fields.forEach((field, i) => {
+            if (config.joinAt.includes(field)) {
+                console.log('Combining: ' + field + '/' + i)
+                rows.forEach((row, rx) => row[i] = listsToCombine[list][rx]);
+                list++;
+            }
+        });
+
+        console.log(rows)
+
+        return this.fromRows(rows, fields, config);
     }
 
     // Get the data from the google sheets
