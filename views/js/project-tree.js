@@ -119,12 +119,12 @@ class ProjectBranch extends HTMLElement {
     renderPresentation() {
         this.presentation = undefined;
         this.presentation_images = []
-        // Get all presentation images [Numbered from 1 to 10]
+        // Get all presentation images [Numbered from 1 to 10 (max)]
         for (let i = 1; i <= 10; i++) {
-            const present = this.getAttribute(`presentation${i}`) || undefined;
+            const present = this.getAttribute(`img${i}`) || undefined;
             if (present) {
                 this.presentation_images.push(present);
-            } else break;
+            } /* else break; */
         }
 
         if (this.presentation_images.length > 0) {
