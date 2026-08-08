@@ -61,13 +61,10 @@ class BaseModel {
         let list = 0;
         fields.forEach((field, i) => {
             if (config.joinAt.includes(field)) {
-                console.log('Combining: ' + field + '/' + i)
                 rows.forEach((row, rx) => row[i] = listsToCombine[list][rx] || {});
                 list++;
             }
         });
-
-        console.log(rows)
 
         return this.fromRows(rows, fields, config);
     }
