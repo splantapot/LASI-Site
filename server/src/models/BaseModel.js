@@ -62,7 +62,7 @@ class BaseModel {
         fields.forEach((field, i) => {
             if (config.joinAt.includes(field)) {
                 console.log('Combining: ' + field + '/' + i)
-                rows.forEach((row, rx) => row[i] = listsToCombine[list][rx]);
+                rows.forEach((row, rx) => row[i] = listsToCombine[list][rx] || {});
                 list++;
             }
         });
