@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { get_template } from './path/templates.js';
-import { copyPublicTemplate, deletePublic } from './path/public.js';
+import { copyPublicTemplate, deletePublic, getHtmlPath } from './path/public.js';
 import Apresentacao from './models/Apresentacao.js';
 import Membro from './models/Membro.js';
 import Patrocinador from './models/Patrocinador.js';
@@ -20,7 +20,7 @@ function createHtml(filename = null, data = null) {
     const template = get_template(ejs_name);
     const html_data = ejs.render(template, data);
 
-    const output_path = get_html_path(html_name);
+    const output_path = getHtmlPath(html_name);
     fs.writeFileSync(output_path, html_data);
 }
 
@@ -76,7 +76,22 @@ async function buildWebsite() {
     }
     console.log('> Seletivos ok')
 
+    const APP_DATA = {
+        apresentacoes: apresentacoes,
+        membros: membros,
+        patrocinadores: patrocinadores,
+        projetos: projetos,
+        seletivos: seletivos
+    }
+
     // Render site ============================================================
+
+    createHtml('index', APP_DATA);
+    createHtml('projetos', APP_DATA);
+    createHtml('membros', APP_DATA);
+    createHtml('seletivos', APP_DATA);
+
+    // Done!
 
     console.log('\n=== Site rendered successfully!');
 }
