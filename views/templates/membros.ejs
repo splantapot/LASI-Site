@@ -19,38 +19,26 @@
 
     <main>
         <member-board title="Membros">
+            <% if (typeof membros !== 'undefined' && membros && membros.length > 0) { %>
+                <% membros.forEach(function(membro) { %>
+                    <member-card
+                        name="<%= membro.nome %>"
+                        role="<%= membro.cargo %>"
+                        area="<%= membro.departamento %>"
+                        <% if (membro.foto) { %>img="<%= membro.foto %>"<% } %>
+                        
+                        <% Object.keys(membro.media || {}).forEach(function(rede) { %>
+                            <%= rede %>="<%= membro.media[rede] %>"
+                        <% }); %>
+
+                        <%= membro.destacar ? 'highlight' : '' %>
+                    ></member-card>
+                <% }); %>
+            <% } %>
             
-            <member-card
-                name="Ana Silva"
-                role="Presidente"
-                area="Executivo"
-                email="https://"
-                github="https://"
-                instagram="https://"
-                highlight
-            ></member-card>
-
-            <member-card
-                name="Carlos Lima"
-                role="Vice-Presidente"
-                area="Executivo"
-            ></member-card>
-
-            <member-card
-                name="Mariana Souza"
-                role="D. MKT"
-                area="Marketing"
-            ></member-card>
-
-            <member-card
-                name="João Pedro"
-                role="D. ELE"
-                area="Eletrônica"
-            ></member-card>
-        
-        <!-- todo: easter egg -->
-
+            <!-- todo: easter egg -->
         </member-board>
+
     </main>
 
     <footer-bar></footer-bar>

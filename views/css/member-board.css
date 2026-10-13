@@ -23,9 +23,8 @@ member-board {
 }
 
 .member-board__header {
-    width: 100%;
     text-align: center;
-    margin: 15px;
+    margin: 10px;
     z-index: 2;
     position: relative;
 }

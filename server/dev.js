@@ -36,7 +36,7 @@ app.get('/projetos', (req, res) => {
 });
 
 app.get('/membros', (req, res) => {
-    res.render('membros');
+    res.render('membros', BUILD_DATA);
 });
 
 app.get('/seletivos', (req, res) => {

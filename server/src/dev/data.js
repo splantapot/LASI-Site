@@ -1,4 +1,5 @@
 import Apresentacao from "../models/Apresentacao.js";
+import Membro from "../models/Membro.js";
 import Patrocinador from "../models/Patrocinador.js";
 import Projeto from "../models/Projeto.js";
 import Seletivo from "../models/Seletivo.js";
@@ -60,7 +61,55 @@ APP_DATA[Projeto.LIST_NAME] = [
     }).toJson()
 ];
 
-APP_DATA[Memb]
+APP_DATA[Membro.LIST_NAME] = [
+    new Membro({
+        nome: "Ana Silva",
+        data_nascimento: "15/04/1998",
+        foto: "./assets/membros/data/ana_silva.png",
+        cargo: "Diretora de Projetos",
+        departamento: "Engenharia",
+        destacar: "sim", // O BaseModel vai converter automaticamente para true usando o validateBool
+        media: {
+            linkedin: "https://linkedin.com",
+            github: "https://github.com"
+        }
+    }),
+    new Membro({
+        nome: "Carlos Santos",
+        data_nascimento: "22/09/1995",
+        foto: "./assets/membros/data/carlos_santos.png",
+        cargo: "Desenvolvedor Fullstack",
+        departamento: "Tecnologia da Informação",
+        destacar: "não", // Será convertido para false pelo BaseModel
+        media: {
+            github: "https://github.com",
+            instagram: "https://instagram.com"
+        }
+    }),
+    new Membro({
+        nome: "Beatriz Oliveira",
+        data_nascimento: "03/11/2000",
+        foto: "./assets/membros/data/beatriz_oliveira.png",
+        cargo: "Designer UI/UX",
+        departamento: "Marketing & Design",
+        destacar: "true", // Também aceito pelo seu validador booleano
+        media: {
+            behance: "https://behance.net",
+            linkedin: "https://linkedin.com"
+        }
+    }),
+    new Membro({
+        nome: "Lucas Almeida",
+        data_nascimento: "30/01/1997",
+        foto: "./assets/membros/data/lucas_almeida.png",
+        cargo: "Consultor Técnico",
+        departamento: "Consultoria",
+        destacar: "0", // Será convertido para false
+        media: {
+            linkedin: "https://linkedin.com"
+        }
+    })
+];
 
 // Seletivos -> Seletivos
 APP_DATA[Seletivo.LIST_NAME] = [

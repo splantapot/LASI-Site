@@ -146,7 +146,16 @@ class MemberCard extends HTMLElement {
         `;
 
         const mediaBox = this.querySelector('.member-card__media');
-        this.renderShareIconsIn(mediaBox)
+        this.renderShareIconsIn(mediaBox);
+
+        // GET ERROR
+        const memberImg = this.querySelector('.member-card__frame img');
+        memberImg.addEventListener('error', () => {
+            const fallbackImg = this.getBlankMemberImg();
+            if (memberImg.src !== fallbackImg) {
+                memberImg.src = fallbackImg;
+            }
+        });
     }
 }
 
