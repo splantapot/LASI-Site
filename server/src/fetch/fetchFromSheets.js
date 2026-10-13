@@ -5,7 +5,6 @@ import { WEB_REQUEST_TIMEOUT } from "../../config.js";
 // https://docs.google.com/uc?export=download&id=
 
 // Demo Query
-// https://sheets.googleapis.com/v4/spreadsheets/1OMgYUQ1wg9kfbOArFGMPOKxeSm9MSgk7cEwHnkgWyFc?fields=sheets.properties(sheetId,title,sheetType,gridProperties)
 
 const GOOGLE_CREDENTIALS = JSON.parse(process.env.GOOGLE_CREDENTIALS);
 
