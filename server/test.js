@@ -1,5 +1,8 @@
-import "./config.js";
+import fetchImage from "./src/fetch/fetchImage.js";
+import { getDownloadLinkToID } from "./src/util/links.js";
 
-import Membro from "./src/models/Membro.js";
-
-const data = await Membro.fromSheet();
+const success = await fetchImage({
+    output: "./here.png",
+    url: getDownloadLinkToID("1Jzfg-LNR1i_sGnHVkRl4Rja5m5owL8fw")
+});
+console.log(success);

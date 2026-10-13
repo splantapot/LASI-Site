@@ -59,7 +59,7 @@ APP_DATA[Projeto.LIST_NAME] = [
     new Projeto({
         titulo: 'Projeto B',
         data: "14 MAI 2026"
-    })
+    }).toJson()
 ];
 
 console.log(APP_DATA.projetos)
