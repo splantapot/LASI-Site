@@ -6,6 +6,9 @@ import path from 'path';
 import { get_template } from './path/templates.js';
 import { copyPublicTemplate, deletePublic } from './path/public.js';
 import Apresentacao from './models/Apresentacao.js';
+import Membro from './models/Membro.js';
+import Patrocinador from './models/Patrocinador.js';
+import Projeto from './models/Projeto.js';
 
 function createHtml(filename = null, data = null) {
     if (!filename || !data) return;
@@ -40,10 +43,38 @@ async function buildWebsite(data) {
         await ap.downloadImage();
         apresentacoes.push(ap);
     }
+    console.log('> Apresentações ok');
+
+    // Membros
+    const membrosList = await Membro.fromSheet();
+    const membros = [];
+    for (const membro of membrosList) {
+        await membro.downloadImage();
+        membros.push(membro);
+    }
+    console.log('> Membros ok');
+
+    // Patrocinadores
+    const patrList = await Patrocinador.fromSheet();
+    const patrocinadores = [];
+    for (const p of patrList) {
+        await p.downloadImage();
+        patrocinadores.push(p);
+    }
+    console.log('> Patrocinadores ok')
+
+    // Projetos
+    const projetosList = await Projeto.fromSheet();
+    const projetos = [];
+    for (const p of projetosList) {
+        await p.downloadImage();
+        projetos.push(p);
+    }
+    console.log('> Projetos ok')
 
     // Render site ============================================================
 
-    console.log('== Site rendered successfully!');
+    console.log('\n=== Site rendered successfully!');
 }
 
 export { buildWebsite };

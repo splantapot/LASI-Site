@@ -4,39 +4,10 @@ const app = express();
 const APP_PORT = 8080;
 
 // Import another modules
-import path from 'path';
 import { VIEWS_PATH, TMP_PATH, ASSETS_PATH, NEWS_PATH, CSS_PATH, JS_PATH } from './config.js';
+
 import APP_DATA from './src/dev/data.js';
-
-// ========================================================
-// Setup for the dev application
-// ========================================================
-
-const BUILD = {NONE: 0, SHEET: 1, IMAGE: 2, FILE: 3, ALL: 4};
-/* IMAGE: includes only images download */
-/* FILE: includes only files download */
-/* ALL: downloads everything from sheets */
-
-let build_mode = BUILD.NONE;
-process.argv.forEach((value, index, array) => {
-    // Update to build mode when used "npm run dev _operation_" command.
-    // Used to render images/data while in development.
-    Object.keys(BUILD).forEach((key) => {
-        if (build_mode == BUILD.NONE && value.trim().toLowerCase() == key.toLowerCase()) build_mode = BUILD[key];
-        else return;
-    });
-});
-
-let BUILD_DATA = {};
-switch (build_mode) {
-    case BUILD.SHEET:
-    case BUILD.IMAGE:
-    case BUILD.FILE:
-    case BUILD.ALL:
-    default:
-        BUILD_DATA = APP_DATA;
-}
-
+const BUILD_DATA = APP_DATA;
 
 // Set the view engine as EJS
 app.set('view engine', 'ejs');
@@ -53,7 +24,6 @@ app.use('/js', express.static(JS_PATH));
 // ========================================================
 
 app.get('/', (req, res) => {
-    console.log('hi')
     res.render('index', BUILD_DATA);
 });
 

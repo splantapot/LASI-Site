@@ -84,10 +84,13 @@ class BaseModel {
             name_field: '',
             img_field: '',
             download_path: '',
-            import_path: ''
+            import_path: '',
+            id: 0,
         }) {
         if (!config || !config.name_field || !config.img_field || config.ext) return;
-        const filename = `${formatName(this[config.name_field])}.png`;
+        const filename = !config.id?
+            `${formatName(this[config.name_field])}.png` :
+            `${formatName(this[config.name_field] + " " + config.id)}.png`;
         const url = getDownloadLinkToID(getIDfromFileLink(this[config.img_field]));
         const downloadSettings = {
             output: path.join(config.download_path, filename),

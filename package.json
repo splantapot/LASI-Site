@@ -7,10 +7,6 @@
     "start": "node server/run.js",
     "build": "node server/run.js",
     "dev": "node --watch server/dev.js",
-    "dev sheet": "node server/dev.js sheet",
-    "dev image": "node server/dev.js image",
-    "dev file": "node server/dev.js file",
-    "dev all": "node server/dev.js all",
     "test": "node server/test.js"
   },
   "author": "Splantapot",
