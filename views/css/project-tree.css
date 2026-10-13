@@ -12,7 +12,7 @@ project-tree {
 
 /* Header */
 .project-tree__header {
-    margin: 15px;
+    margin: 6px;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -22,6 +22,11 @@ project-tree {
     font-family: var(--font-michroma);
     font-size: var(--text-lg);
     z-index: 4;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    width: 90vw;
+    border-radius: 50%;
+    text-align: center;
 }
 
 .project-tree__no-project-label {
@@ -38,12 +43,13 @@ project-tree {
 
 /* Propriedades do Body */
 .project-tree__body {
+    position: relative;
+    padding: 0.5%;
+
     display: grid;
     grid-template-columns: 1fr 1fr;
-    row-gap: 30px;
-    column-gap: 200px; /* Distância de 200px no meio */
+    column-gap: 1.5%;
     justify-items: center;
-    position: relative;
     min-height: 70vh;
 }
 
@@ -56,7 +62,7 @@ project-tree {
     bottom: 20px;
     width: 6px;
     left: 50%;
-    transform: translateX(-50%); /* Centraliza perfeitamente no meio do column-gap */
+    transform: translateX(-50%);
     z-index: 1;
 }
 
@@ -73,6 +79,17 @@ project-tree {
     border-right: 10px solid transparent;
     border-top: 8px solid var(--brand-yellow);
     z-index: 2;
+}
+
+.project-tree__body-left,
+.project-tree__body-right {
+    display: flex;
+    flex-direction: column;
+    gap: 70px;
+}
+
+.project-tree__body-right {
+    padding-top: 10%;
 }
 
 /* Footer */
@@ -102,16 +119,38 @@ project-branch {
     z-index: 3;
 }
 
-project-branch:nth-child(odd) {
-    grid-column: 1;
-    justify-content: flex-end;
-    margin-bottom: 60px;
+.project-tree__body-left project-branch {
+    flex-shrink: 0;
 }
 
-project-branch:nth-child(even) {
-    grid-column: 2;
-    justify-content: flex-start;
-    margin-top: 60px;
+.project-tree__body-left project-branch:nth-child(n)::after {
+    content: '';
+    position: absolute;
+    background-image: linear-gradient(to bottom, var(--brand-yellow), var(--shadow-yellow));
+    top: 50%;
+    transform: translate(0%, -50%);
+    z-index: 1;
+    /* width: 20px;
+    height: 1px; */
+    border-top: 20px solid transparent;
+    border-right: 15px solid var(--brand-yellow);
+    border-bottom: 20px solid transparent;
+    right: -15%;
+}
+
+.project-tree__body-right project-branch:nth-child(n)::after {
+    content: '';
+    position: absolute;
+    background-image: linear-gradient(to bottom, var(--brand-yellow), var(--shadow-yellow));
+    top: 50%;
+    transform: translate(0%, -50%);
+    z-index: 1;
+    /* width: 20px;
+    height: 1px; */
+    border-top: 20px solid transparent;
+    border-left: 15px solid var(--brand-yellow);
+    border-bottom: 20px solid transparent;
+    left: -15%;
 }
 
 .project-branch__container {
@@ -119,8 +158,8 @@ project-branch:nth-child(even) {
     border: 2px solid var(--brand-yellow);
     border-radius: 8px;
     width: 100%;
-    max-width: 400px;
-    min-height: 250px; 
+    max-width: 35vw;
+    min-height: 55vh; 
     height: auto; 
     position: relative;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
@@ -134,55 +173,6 @@ project-branch:nth-child(even) {
     border-color: var(--brand-yellow);
     box-shadow: 0 0 15px rgba(255, 230, 0, 0.3);
     transform: translateY(-3px);
-}
-
-/* -------------------------------------------------------------
-   LINHAS CONECTORAS (Do card até a linha amarela central)
-   ------------------------------------------------------------- */
-
-/* Linha Horizontal (::before) */
-.project-branch__container::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 100px; /* Metade do column-gap de 200px */
-    height: 2px;
-    background-color: var(--brand-yellow);
-    z-index: 1;
-}
-
-/* Esquerda: Linha sai do lado direito do card */
-project-branch:nth-child(odd) .project-branch__container::before {
-    right: -100px;
-}
-
-/* Direita: Linha sai do lado esquerdo do card */
-project-branch:nth-child(even) .project-branch__container::before {
-    left: -100px;
-}
-
-/* Ponto de Conexão / Bolinha no Centro (::after) */
-.project-branch__container::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 10px;
-    height: 10px;
-    background-color: var(--brand-yellow);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--brand-yellow);
-    z-index: 2;
-}
-
-/* Ponto no encontro exato do centro */
-project-branch:nth-child(odd) .project-branch__container::after {
-    right: -105px; /* 100px + metade da largura da bolinha */
-}
-
-project-branch:nth-child(even) .project-branch__container::after {
-    left: -105px; /* 100px + metade da largura da bolinha */
 }
 
 /* FORMATS */
@@ -209,7 +199,8 @@ project-branch:nth-child(even) .project-branch__container::after {
 
 .project-branch__modal-icons-wrapper,
 .project-branch__modal-title-wrapper,
-.project-branch__title-wrapper {
+.project-branch__title-wrapper,
+.project-branch__media-wrapper {
     display: flex;
     /* flex-wrap: wrap; */
     align-items: center;
@@ -289,6 +280,7 @@ project-branch:nth-child(even) .project-branch__container::after {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    text-align: justify;
 }
 
 .project-branch__long-text {
@@ -412,6 +404,7 @@ project-branch:nth-child(even) .project-branch__container::after {
     color: var(--text-muted);
     margin: 0;
     line-height: 1.4;
+    text-align: justify;
 }
 
 /* ===========================

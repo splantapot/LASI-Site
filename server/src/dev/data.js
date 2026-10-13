@@ -1,6 +1,7 @@
 import Apresentacao from "../models/Apresentacao.js";
 import Patrocinador from "../models/Patrocinador.js";
 import Projeto from "../models/Projeto.js";
+import Seletivo from "../models/Seletivo.js";
 
 // module with fake dev app data
 
@@ -43,8 +44,9 @@ APP_DATA[Patrocinador.LIST_NAME] = [
 APP_DATA[Projeto.LIST_NAME] = [
     new Projeto({
         titulo: 'Projeto A',
-        data: "17 MAR 2026",
-        media: 'https://mail.google.com/, https://instagram.com/lasi.ufpi,https://github.com/LASI-UFPI,https://youtube.com/@lasi-4908',
+        data: "17 abs 2026",
+        media: {email: "https://mail.google.com/", instagram:"https://instagram.com/lasi.ufpi", github:"https://github.com/LASI-UFPI", youtube:"https://youtube.com/@lasi-4908"},
+        img1: './assets/info/logomarca-lasi.png',
         texto: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             Maecenas et tellus sed ipsum aliquet suscipit a at mi.
             Suspendisse lacus felis, consectetur in arcu non, elementum elementum odio.
@@ -55,13 +57,14 @@ APP_DATA[Projeto.LIST_NAME] = [
             Nullam dictum risus nibh, et sodales nibh varius id.
             Nullam dictum risus nibh, et sodales nibh varius id.
             Nam tempor, tortor et sagittis porta, orci purus cursus ligula, ut ullamcorper risus nulla in tellus. Morbi maximus massa suscipit, scelerisque nisl in, tincidunt elit.`
-    }).toJson(),
-    new Projeto({
-        titulo: 'Projeto B',
-        data: "14 MAI 2026"
     }).toJson()
 ];
 
-console.log(APP_DATA.projetos)
+APP_DATA[Memb]
+
+// Seletivos -> Seletivos
+APP_DATA[Seletivo.LIST_NAME] = [
+
+]
 
 export default APP_DATA;

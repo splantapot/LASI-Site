@@ -18,66 +18,30 @@
 <body>
     <!-- <pcb-background color="var(--pcb-color-blue)"></pcb-background> -->
     <pcb-background color="var(--pcb-color-cyan)"></pcb-background>
-    <!-- todo: update psb-background to use canvas -->
 
     <navigation-bar></navigation-bar>
 
     <main>
+        <project-tree title="Nossos Projetos" footer="...">
 
+        <% if (typeof projetos !== 'undefined' && projetos && projetos.length > 0) { %>
+            <% projetos.forEach(function(projeto) { %>
+                <project-branch
+                    title="<%= projeto.titulo %>"
+                    date="<%= projeto.data %>"
+                    
+                    <% Object.keys(projeto.media || {}).forEach(function(media) { %>
+                        <%= media %>='<%= projeto.media[media] %>'
+                    <% }); %>
 
+                    text="<%= projeto.texto %>"
 
-        <project-tree title="Nossos Projetos" footer="To be continued...">
-
-        <project-branch
-            title="Projeto bem loucamente"
-            date="17 MAR 2026"
-            link="https://mail.google.com/"
-            instagram="https://mail.google.com/"
-            whatsapp="https://mail.google.com/"
-            facebook="https://mail.google.com/"
-            github="https://mail.google.com/"
-            telegram="https://mail.google.com/"
-            text="
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Maecenas et tellus sed ipsum aliquet suscipit a at mi.
-            Suspendisse lacus felis, consectetur in arcu non, elementum elementum odio.
-            Nullam dictum risus nibh, et sodales nibh varius id.
-            Nullam dictum risus nibh, et sodales nibh varius id.
-            Nullam dictum risus nibh, et sodales nibh varius id.
-            Nullam dictum risus nibh, et sodales nibh varius id.
-            Nullam dictum risus nibh, et sodales nibh varius id.
-            Nullam dictum risus nibh, et sodales nibh varius id.
-            Nam tempor, tortor et sagittis porta, orci purus cursus ligula, ut ullamcorper risus nulla in tellus. Morbi maximus massa suscipit, scelerisque nisl in, tincidunt elit."
-        ></project-branch>
-
-        <project-branch
-            title="Oxe"
-            link="https://mail.google.com/"
-            date=""
-            text="
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Maecenas et tellus sed ipsum aliquet suscipit a at mi.
-            Suspendisse lacus felis, consectetur in arcu non, elementum elementum odio.
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Maecenas et tellus sed ipsum aliquet suscipit a at mi.
-            Suspendisse lacus felis, consectetur in arcu non, elementum elementum odio.
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Maecenas et tellus sed ipsum aliquet suscipit a at mi.
-            Suspendisse lacus felis, consectetur in arcu non, elementum elementum odio.
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Maecenas et tellus sed ipsum aliquet suscipit a at mi.
-            Suspendisse lacus felis, consectetur in arcu non, elementum elementum odio.
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Maecenas et tellus sed ipsum aliquet suscipit a at mi.
-            Suspendisse lacus felis, consectetur in arcu non, elementum elementum odio.
-            Nullam dictum risus nibh, et sodales nibh varius id."
-            thumbnail="./assets/projetos/default/blank-thumbnail.png"
-            img1="./assets/projetos/default/blank-presentation.png"
-            img2="./assets/projetos/default/blank-presentation.png"
-            img3="./assets/projetos/default/blank-presentation.png"
-            img4="./assets/projetos/default/blank-presentation.png"
-            img5="./assets/projetos/default/blank-presentation.png"
-        ></project-branch>
+                    <% let i = 1; while (projeto['img' + i] !== undefined) { %>
+                        img<%= i %>="<%= projeto['img' + i] %>"
+                    <% i++; } %>
+                ></project-branch>
+            <% }); %>
+        <% } %>
         
         </project-tree>
     </main>

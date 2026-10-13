@@ -32,7 +32,7 @@ app.get('/demo', (req, res) => {
 });
 
 app.get('/projetos', (req, res) => {
-    res.render('projetos');
+    res.render('projetos', BUILD_DATA);
 });
 
 app.get('/membros', (req, res) => {

@@ -20,7 +20,7 @@ slider-box {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 32px;
+    bottom: 4%;
     display: flex;
     justify-content: center;
     gap: 12px;

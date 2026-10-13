@@ -18,7 +18,7 @@ class NavigationBar extends HTMLElement {
                         <a class="nav-bar__link" href="/projetos">Projetos</a>
                         <a class="nav-bar__link" href="/membros">Membros</a>
                         <a class="nav-bar__link" href="/seletivos">Seletivos</a>
-                        <a class="nav-bar__link" href="/noticias">Notícias</a>
+                        <!-- <a class="nav-bar__link" href="/noticias">Notícias</a> -->
                         <a class="nav-bar__link" href="/acervo">Acervo</a>
                     </nav>
                 </div>

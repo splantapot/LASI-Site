@@ -1,15 +1,35 @@
-// AI CODED!!!
-
 class PcbBackground extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
+
         this.seed = Date.now();
         this.resizeTimeout = null;
+        this.animFrameId = null;
+
+        // Métricas do FPS
+        this.frameCount = 0;
+        this.fps = 0;
+        this.fpsLastUpdate = performance.now();
+
+        // Canvas
+        this.canvasStatic = document.createElement('canvas');
+        this.canvasAnim = document.createElement('canvas');
+        this.ctxStatic = this.canvasStatic.getContext('2d');
+        this.ctxAnim = this.canvasAnim.getContext('2d');
+
+        // Grid e Coleções
+        this.gridSize = 20;
+        this.connectionPoints = [];
+        
+        // Estruturas de Animação
+        this.animatedTraces = [];
+        this.animatedLeds = [];
+        this.animatedIcs = [];
     }
 
     static get observedAttributes() {
-        return ['color', 'devmode'];
+        return ['color', 'devmode', 'seed'];
     }
 
     get devmode() {
@@ -23,18 +43,24 @@ class PcbBackground extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue !== newValue && this.isConnected) {
-            this.renderCircuit();
+            if (name === 'seed') {
+                this.seed = Number(newValue) || Date.now();
+            }
+            this.handleResize();
         }
     }
 
     connectedCallback() {
-        this.renderCircuit();
+        this.setupShadowDom();
 
         this.resizeObserver = new ResizeObserver(() => {
             clearTimeout(this.resizeTimeout);
-            this.resizeTimeout = setTimeout(() => this.renderCircuit(), 150);
+            this.resizeTimeout = setTimeout(() => this.handleResize(), 150);
         });
         this.resizeObserver.observe(document.documentElement);
+
+        this.handleResize();
+        this.startAnimationLoop();
     }
 
     disconnectedCallback() {
@@ -44,6 +70,39 @@ class PcbBackground extends HTMLElement {
         if (this.resizeTimeout) {
             clearTimeout(this.resizeTimeout);
         }
+        this.stopAnimationLoop();
+    }
+
+    setupShadowDom() {
+        const style = document.createElement('style');
+        style.textContent = `
+            :host {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                z-index: -9999 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+                pointer-events: none !important;
+                display: block !important;
+                background-color: var(--shadow-cyan, #0a0d14);
+            }
+            canvas {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: block;
+            }
+        `;
+
+        this.shadowRoot.appendChild(style);
+        this.shadowRoot.appendChild(this.canvasStatic);
+        this.shadowRoot.appendChild(this.canvasAnim);
     }
 
     createRandomGenerator(seed) {
@@ -63,108 +122,68 @@ class PcbBackground extends HTMLElement {
         return attrColor;
     }
 
-    renderCircuit() {
-        const random = this.createRandomGenerator(this.seed);
-
+    handleResize() {
         const width = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
         const height = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+        const dpr = window.devicePixelRatio || 1;
 
+        this.width = width;
+        this.height = height;
+
+        this.canvasStatic.width = width * dpr;
+        this.canvasStatic.height = height * dpr;
+        this.ctxStatic.scale(dpr, dpr);
+
+        this.canvasAnim.width = width * dpr;
+        this.canvasAnim.height = height * dpr;
+        this.ctxAnim.scale(dpr, dpr);
+
+        this.renderStaticLayer();
+    }
+
+    isAreaFree(grid, c, r, wSlots, hSlots, cols, rows) {
+        for (let i = 0; i < wSlots; i++) {
+            for (let j = 0; j < hSlots; j++) {
+                if (c + i >= cols || r + j >= rows || grid[c + i][r + j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    occupyArea(grid, c, r, wSlots, hSlots) {
+        for (let i = 0; i < wSlots; i++) {
+            for (let j = 0; j < hSlots; j++) {
+                grid[c + i][r + j] = true;
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // DESENHO ESTÁTICO
+    // -----------------------------------------------------------------
+    renderStaticLayer() {
+        const ctx = this.ctxStatic;
+        const width = this.width;
+        const height = this.height;
+        const random = this.createRandomGenerator(this.seed);
         const strokeColor = this.getResolvedColor();
-        const isDevMode = this.devmode;
-        
-        const gridSize = 20;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const gridSize = this.gridSize;
+        const halfGrid = gridSize / 2;
         const cols = Math.floor(width / gridSize);
         const rows = Math.floor(height / gridSize);
 
-        const devStyles = isDevMode ? `
-            .dev-grid-line { stroke: #ff0055; stroke-opacity: 0.35; stroke-width: 0.7; }
-            .dev-grid-text { fill: #ff0055; font-size: 8px; font-family: monospace; opacity: 0.6; }
-        ` : '';
-
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host {
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    width: 100vw !important;
-                    height: 100vh !important;
-                    z-index: -9999 !important;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    overflow: hidden !important;
-                    pointer-events: none !important;
-                    display: block !important;
-                    background-color: var(--shadow-cyan);
-                }
-                svg {
-                    width: 100%;
-                    height: 100%;
-                    display: block;
-                }
-                
-                @keyframes smd-blink {
-                    0%, 100% { fill-opacity: 0.2; filter: none; }
-                    50% { fill-opacity: 1; filter: drop-shadow(0 0 4px ${strokeColor}); }
-                }
-
-                .led-smd-chip {
-                    animation: smd-blink infinite ease-in-out;
-                }
-
-                @keyframes pcb-flow {
-                    from { stroke-dashoffset: 24; }
-                    to { stroke-dashoffset: 0; }
-                }
-
-                .trilha-flow {
-                    stroke-dasharray: 4, 8;
-                    animation: pcb-flow linear infinite;
-                }
-
-                ${devStyles}
-            </style>
-            <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-                <defs>
-                    <pattern id="grid" width="${gridSize}" height="${gridSize}" patternUnits="userSpaceOnUse">
-                        <path d="M ${gridSize} 0 L 0 0 0 ${gridSize}" fill="none" stroke="${strokeColor}" stroke-opacity="0.04" stroke-width="0.5"/>
-                    </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#grid)" />
-                
-                ${isDevMode ? this.generateDevGrid(cols, rows, gridSize, width, height) : ''}
-
-                <g fill="none" stroke="${strokeColor}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.6">
-                    ${this.generateCircuitLayout(cols, rows, gridSize, random, strokeColor)}
-                </g>
-            </svg>
-        `;
-    }
-
-    generateDevGrid(cols, rows, gridSize, width, height) {
-        let lines = '';
-        for (let c = 0; c <= cols; c++) {
-            const x = c * gridSize;
-            lines += `<line x1="${x}" y1="0" x2="${x}" y2="${height}" class="dev-grid-line" />`;
-            if (c % 2 === 0) lines += `<text x="${x + 2}" y="9" class="dev-grid-text">C${c}</text>`;
-        }
-        for (let r = 0; r <= rows; r++) {
-            const y = r * gridSize;
-            lines += `<line x1="0" y1="${y}" x2="${width}" y2="${y}" class="dev-grid-line" />`;
-            if (r % 2 === 0) lines += `<text x="2" y="${y - 2}" class="dev-grid-text">R${r}</text>`;
-        }
-        return `<g id="dev-grid">${lines}</g>`;
-    }
-
-    generateCircuitLayout(cols, rows, gridSize, random, strokeColor) {
-        let svgElements = '';
         const grid = Array(cols).fill(null).map(() => Array(rows).fill(false));
-        const connectionPoints = [];
-        const halfGrid = gridSize / 2;
+        this.connectionPoints = [];
+        this.animatedTraces = [];
+        this.animatedLeds = [];
+        this.animatedIcs = [];
 
-        // -------------------------------------------------------------
-        // 1. CIRCUITOS INTEGRADOS (CIs)
-        // -------------------------------------------------------------
+        // 1. CIs
         for (let c = 2; c < cols - 4; c += 5) {
             for (let r = 2; r < rows - 4; r += 5) {
                 if (grid[c][r]) continue;
@@ -187,89 +206,28 @@ class PcbBackground extends HTMLElement {
 
                     if (this.isAreaFree(grid, c, r, blockWidthSlots, blockHeightSlots, cols, rows)) {
                         this.occupyArea(grid, c, r, blockWidthSlots, blockHeightSlots);
-
-                        const x = c * gridSize;
-                        const y = r * gridSize;
-                        const w = blockWidthSlots * gridSize;
-                        const h = blockHeightSlots * gridSize;
-
-                        const padMargin = 4;
-                        const bodyX = x + padMargin;
-                        const bodyY = y + padMargin;
-                        const bodyW = w - (padMargin * 2);
-                        const bodyH = h - (padMargin * 2);
-
-                        let pinsSvg = '';
-
-                        for (let rowIdx = 0; rowIdx < blockHeightSlots; rowIdx++) {
-                            const pinY = y + (rowIdx * gridSize) + halfGrid;
-                            pinsSvg += `<line x1="${x}" y1="${pinY}" x2="${bodyX}" y2="${pinY}" stroke="${strokeColor}" stroke-width="1.2" />`;
-                            pinsSvg += `<line x1="${bodyX + bodyW}" y1="${pinY}" x2="${x + w}" y2="${pinY}" stroke="${strokeColor}" stroke-width="1.2" />`;
-
-                            connectionPoints.push({ c: c, r: r + rowIdx });
-                            connectionPoints.push({ c: c + blockWidthSlots - 1, r: r + rowIdx });
-                        }
-
-                        if (icType !== 0) {
-                            for (let colIdx = 0; colIdx < blockWidthSlots; colIdx++) {
-                                const pinX = x + (colIdx * gridSize) + halfGrid;
-                                pinsSvg += `<line x1="${pinX}" y1="${y}" x2="${pinX}" y2="${bodyY}" stroke="${strokeColor}" stroke-width="1.2" />`;
-                                pinsSvg += `<line x1="${pinX}" y1="${bodyY + bodyH}" x2="${pinX}" y2="${y + h}" stroke="${strokeColor}" stroke-width="1.2" />`;
-
-                                connectionPoints.push({ c: c + colIdx, r: r });
-                                connectionPoints.push({ c: c + colIdx, r: r + blockHeightSlots - 1 });
-                            }
-                        }
-
-                        let notchSvg = `<circle cx="${bodyX + 5}" cy="${bodyY + 5}" r="1.5" fill="${strokeColor}" stroke="none" />`;
-                        if (icType === 0) {
-                            notchSvg += `<path d="M ${bodyX + (bodyW / 2) - 3} ${bodyY} A 3 3 0 0 0 ${bodyX + (bodyW / 2) + 3} ${bodyY}" fill="#161b22" stroke="${strokeColor}" stroke-width="1" />`;
-                        }
-
-                        svgElements += `
-                            <g class="componente-ci">
-                                ${pinsSvg}
-                                <rect x="${bodyX}" y="${bodyY}" width="${bodyW}" height="${bodyH}" rx="2" fill="#161b22" stroke="${strokeColor}" stroke-width="1.2" />
-                                ${notchSvg}
-                            </g>
-                        `;
+                        this.drawIntegratedCircuit(ctx, c, r, blockWidthSlots, blockHeightSlots, icType, strokeColor, random);
                     }
                 }
             }
         }
 
-        // -------------------------------------------------------------
-        // 2. HEADER PINS / BARRA DE PINOS (Novo Componente)
-        // -------------------------------------------------------------
+        // 2. HEADER PINS
         for (let c = 1; c < cols - 5; c += 6) {
             for (let r = 1; r < rows - 2; r += 5) {
                 if (grid[c][r]) continue;
 
                 if (random() < 0.05) {
-                    const pinCount = Math.floor(random() * 3) + 3; // 3 a 5 pinos
+                    const pinCount = Math.floor(random() * 3) + 3;
                     if (this.isAreaFree(grid, c, r, pinCount, 1, cols, rows)) {
                         this.occupyArea(grid, c, r, pinCount, 1);
-
-                        let pinsHtml = '';
-                        for (let p = 0; p < pinCount; p++) {
-                            const px = (c + p) * gridSize + halfGrid;
-                            const py = r * gridSize + halfGrid;
-                            pinsHtml += `
-                                <rect x="${px - 4}" y="${py - 4}" width="8" height="8" fill="#161b22" stroke="${strokeColor}" stroke-width="1" />
-                                <circle cx="${px}" cy="${py}" r="1.5" fill="${strokeColor}" stroke="none" />
-                            `;
-                            connectionPoints.push({ c: c + p, r: r });
-                        }
-
-                        svgElements += `<g class="componente-header-pins">${pinsHtml}</g>`;
+                        this.drawHeaderPins(ctx, c, r, pinCount, strokeColor);
                     }
                 }
             }
         }
 
-        // -------------------------------------------------------------
-        // 3. DIP SWITCH (Novo Componente)
-        // -------------------------------------------------------------
+        // 3. DIP SWITCH
         for (let c = 2; c < cols - 4; c += 6) {
             for (let r = 2; r < rows - 3; r += 6) {
                 if (grid[c][r]) continue;
@@ -278,38 +236,13 @@ class PcbBackground extends HTMLElement {
                     const switchSlots = 3;
                     if (this.isAreaFree(grid, c, r, switchSlots, 2, cols, rows)) {
                         this.occupyArea(grid, c, r, switchSlots, 2);
-
-                        const startX = c * gridSize;
-                        const startY = r * gridSize;
-                        const w = switchSlots * gridSize;
-                        const h = 2 * gridSize;
-
-                        let switchesHtml = '';
-                        for (let s = 0; s < switchSlots; s++) {
-                            const swX = startX + (s * gridSize) + 5;
-                            const isOn = random() > 0.5;
-                            switchesHtml += `
-                                <rect x="${swX}" y="${startY + 6}" width="10" height="28" rx="1" fill="#0b0f19" stroke="${strokeColor}" stroke-width="0.8" />
-                                <rect x="${swX + 2}" y="${isOn ? startY + 8 : startY + 20}" width="6" height="10" rx="1" fill="${strokeColor}" stroke="none" />
-                            `;
-                            connectionPoints.push({ c: c + s, r: r });
-                            connectionPoints.push({ c: c + s, r: r + 1 });
-                        }
-
-                        svgElements += `
-                            <g class="componente-dip-switch">
-                                <rect x="${startX + 2}" y="${startY + 2}" width="${w - 4}" height="${h - 4}" rx="2" fill="#161b22" stroke="${strokeColor}" stroke-width="1.2" />
-                                ${switchesHtml}
-                            </g>
-                        `;
+                        this.drawDipSwitch(ctx, c, r, switchSlots, random, strokeColor);
                     }
                 }
             }
         }
 
-        // -------------------------------------------------------------
-        // 4. TRANSISTOR SMD SOT-23 (Novo Componente)
-        // -------------------------------------------------------------
+        // 4. TRANSISTOR SOT-23
         for (let c = 1; c < cols - 3; c += 4) {
             for (let r = 1; r < rows - 3; r += 4) {
                 if (grid[c][r]) continue;
@@ -317,33 +250,13 @@ class PcbBackground extends HTMLElement {
                 if (random() < 0.06) {
                     if (this.isAreaFree(grid, c, r, 2, 2, cols, rows)) {
                         this.occupyArea(grid, c, r, 2, 2);
-
-                        const startX = c * gridSize + halfGrid;
-                        const startY = r * gridSize + halfGrid;
-
-                        svgElements += `
-                            <g class="componente-transistor-sot23">
-                                <!-- Traces de conexão -->
-                                <line x1="${startX}" y1="${startY - 6}" x2="${startX}" y2="${startY + 6}" stroke="${strokeColor}" stroke-width="1.2" />
-                                <line x1="${startX + 12}" y1="${startY}" x2="${startX + 20}" y2="${startY}" stroke="${strokeColor}" stroke-width="1.2" />
-                                
-                                <!-- Corpo do Transistor SOT-23 -->
-                                <rect x="${startX - 3}" y="${startY - 8}" width="10" height="16" rx="1" fill="#161b22" stroke="${strokeColor}" stroke-width="1" />
-                                <!-- Aba Dissipadora Metalizada -->
-                                <rect x="${startX + 7}" y="${startY - 5}" width="3" height="10" fill="${strokeColor}" fill-opacity="0.7" stroke="none" />
-                            </g>
-                        `;
-
-                        connectionPoints.push({ c: c, r: r });
-                        connectionPoints.push({ c: c + 1, r: r });
+                        this.drawTransistorSot23(ctx, c, r, strokeColor);
                     }
                 }
             }
         }
 
-        // -------------------------------------------------------------
-        // 5. LED SMD (Com Blink Ativo)
-        // -------------------------------------------------------------
+        // 5. LED SMD
         for (let c = 2; c < cols - 3; c += 4) {
             for (let r = 2; r < rows - 3; r += 4) {
                 if (grid[c][r]) continue;
@@ -355,53 +268,13 @@ class PcbBackground extends HTMLElement {
 
                     if (this.isAreaFree(grid, c, r, wSlots, hSlots, cols, rows)) {
                         this.occupyArea(grid, c, r, wSlots, hSlots);
-
-                        const startX = c * gridSize + halfGrid;
-                        const startY = r * gridSize + halfGrid;
-                        const endX = (c + wSlots - 1) * gridSize + halfGrid;
-                        const endY = (r + hSlots - 1) * gridSize + halfGrid;
-
-                        const duration = (random() * 2 + 1).toFixed(2);
-                        const delay = (random() * 2).toFixed(2);
-
-                        if (isHorizontal) {
-                            const midX = (startX + endX) / 2;
-                            svgElements += `
-                                <g class="componente-led-smd">
-                                    <line x1="${startX}" y1="${startY}" x2="${midX - 7}" y2="${startY}" stroke="${strokeColor}" stroke-width="1.2" />
-                                    <line x1="${midX + 7}" y1="${startY}" x2="${endX}" y2="${startY}" stroke="${strokeColor}" stroke-width="1.2" />
-                                    
-                                    <rect x="${midX - 7}" y="${startY - 4}" width="14" height="8" rx="1" fill="#161b22" stroke="${strokeColor}" stroke-width="1" />
-                                    <rect x="${midX - 7}" y="${startY - 4}" width="3" height="8" fill="${strokeColor}" fill-opacity="0.6" stroke="none" />
-                                    <rect x="${midX + 4}" y="${startY - 4}" width="3" height="8" fill="${strokeColor}" fill-opacity="0.6" stroke="none" />
-                                    <rect class="led-smd-chip" x="${midX - 2.5}" y="${startY - 2.5}" width="5" height="5" rx="1" fill="${strokeColor}" stroke="none" style="animation-duration: ${duration}s; animation-delay: ${delay}s;" />
-                                </g>
-                            `;
-                        } else {
-                            const midY = (startY + endY) / 2;
-                            svgElements += `
-                                <g class="componente-led-smd">
-                                    <line x1="${startX}" y1="${startY}" x2="${startX}" y2="${midY - 7}" stroke="${strokeColor}" stroke-width="1.2" />
-                                    <line x1="${startX}" y1="${midY + 7}" x2="${startX}" y2="${endY}" stroke="${strokeColor}" stroke-width="1.2" />
-                                    
-                                    <rect x="${startX - 4}" y="${midY - 7}" width="8" height="14" rx="1" fill="#161b22" stroke="${strokeColor}" stroke-width="1" />
-                                    <rect x="${startX - 4}" y="${midY - 7}" width="8" height="3" fill="${strokeColor}" fill-opacity="0.6" stroke="none" />
-                                    <rect x="${startX - 4}" y="${midY + 4}" width="8" height="3" fill="${strokeColor}" fill-opacity="0.6" stroke="none" />
-                                    <rect class="led-smd-chip" x="${startX - 2.5}" y="${midY - 2.5}" width="5" height="5" rx="1" fill="${strokeColor}" stroke="none" style="animation-duration: ${duration}s; animation-delay: ${delay}s;" />
-                                </g>
-                            `;
-                        }
-
-                        connectionPoints.push({ c: c, r: r });
-                        connectionPoints.push({ c: c + (isHorizontal ? 1 : 0), r: r + (isHorizontal ? 0 : 1) });
+                        this.drawLedSmd(ctx, c, r, isHorizontal, strokeColor, random);
                     }
                 }
             }
         }
 
-        // -------------------------------------------------------------
-        // 6. CAPACITORES SMD
-        // -------------------------------------------------------------
+        // 6. CAPACITOR SMD
         for (let c = 1; c < cols - 3; c += 4) {
             for (let r = 1; r < rows - 3; r += 4) {
                 if (grid[c][r]) continue;
@@ -413,44 +286,13 @@ class PcbBackground extends HTMLElement {
 
                     if (this.isAreaFree(grid, c, r, wSlots, hSlots, cols, rows)) {
                         this.occupyArea(grid, c, r, wSlots, hSlots);
-
-                        const startX = c * gridSize + halfGrid;
-                        const startY = r * gridSize + halfGrid;
-                        const endX = (c + wSlots - 1) * gridSize + halfGrid;
-                        const endY = (r + hSlots - 1) * gridSize + halfGrid;
-
-                        if (isHorizontal) {
-                            const midX = (startX + endX) / 2;
-                            svgElements += `
-                                <g class="componente-capacitor-smd">
-                                    <line x1="${startX}" y1="${startY}" x2="${endX}" y2="${startY}" stroke="${strokeColor}" stroke-width="1.2" />
-                                    <rect x="${midX - 6}" y="${startY - 4}" width="12" height="8" rx="1" fill="#161b22" stroke="${strokeColor}" stroke-width="1" />
-                                    <rect x="${midX - 6}" y="${startY - 4}" width="3.5" height="8" fill="${strokeColor}" fill-opacity="0.7" stroke="none" />
-                                    <rect x="${midX + 2.5}" y="${startY - 4}" width="3.5" height="8" fill="${strokeColor}" fill-opacity="0.7" stroke="none" />
-                                </g>
-                            `;
-                        } else {
-                            const midY = (startY + endY) / 2;
-                            svgElements += `
-                                <g class="componente-capacitor-smd">
-                                    <line x1="${startX}" y1="${startY}" x2="${startX}" y2="${endY}" stroke="${strokeColor}" stroke-width="1.2" />
-                                    <rect x="${startX - 4}" y="${midY - 6}" width="8" height="12" rx="1" fill="#161b22" stroke="${strokeColor}" stroke-width="1" />
-                                    <rect x="${startX - 4}" y="${midY - 6}" width="8" height="3.5" fill="${strokeColor}" fill-opacity="0.7" stroke="none" />
-                                    <rect x="${startX - 4}" y="${midY + 2.5}" width="8" height="3.5" fill="${strokeColor}" fill-opacity="0.7" stroke="none" />
-                                </g>
-                            `;
-                        }
-
-                        connectionPoints.push({ c: c, r: r });
-                        connectionPoints.push({ c: c + (isHorizontal ? 1 : 0), r: r + (isHorizontal ? 0 : 1) });
+                        this.drawCapacitorSmd(ctx, c, r, isHorizontal, strokeColor);
                     }
                 }
             }
         }
 
-        // -------------------------------------------------------------
-        // 7. OSCILADOR DE CRISTAL (RTC/CLOCK)
-        // -------------------------------------------------------------
+        // 7. CRISTAL OSCILADOR
         for (let c = 3; c < cols - 3; c += 6) {
             for (let r = 3; r < rows - 3; r += 6) {
                 if (grid[c][r]) continue;
@@ -458,36 +300,17 @@ class PcbBackground extends HTMLElement {
                 if (random() < 0.04) {
                     if (this.isAreaFree(grid, c, r, 2, 1, cols, rows)) {
                         this.occupyArea(grid, c, r, 2, 1);
-
-                        const startX = c * gridSize + halfGrid;
-                        const startY = r * gridSize + halfGrid;
-                        const endX = (c + 1) * gridSize + halfGrid;
-
-                        const midX = (startX + endX) / 2;
-
-                        svgElements += `
-                            <g class="componente-cristal">
-                                <line x1="${startX}" y1="${startY}" x2="${endX}" y2="${startY}" stroke="${strokeColor}" stroke-width="1.2" />
-                                <rect x="${midX - 10}" y="${startY - 6}" width="20" height="12" rx="5" fill="#161b22" stroke="${strokeColor}" stroke-width="1.2" />
-                                <line x1="${midX - 6}" y1="${startY - 3}" x2="${midX - 6}" y2="${startY + 3}" stroke="${strokeColor}" stroke-width="1" />
-                                <line x1="${midX + 6}" y1="${startY - 3}" x2="${midX + 6}" y2="${startY + 3}" stroke="${strokeColor}" stroke-width="1" />
-                            </g>
-                        `;
-
-                        connectionPoints.push({ c: c, r: r });
-                        connectionPoints.push({ c: c + 1, r: r });
+                        this.drawCrystalOscillator(ctx, c, r, strokeColor);
                     }
                 }
             }
         }
 
-        // -------------------------------------------------------------
-        // 8. GERAÇÃO DE TRILHAS E FLUXO
-        // -------------------------------------------------------------
-        connectionPoints.forEach(pt => {
+        // 8. ROTEAMENTO DE TRILHAS
+        this.connectionPoints.forEach(pt => {
             const dirX = random() > 0.5 ? (random() > 0.5 ? 1 : -1) : 0;
             const dirY = dirX === 0 ? (random() > 0.5 ? 1 : -1) : 0;
-            svgElements += this.drawTrilhaAt(pt.c, pt.r, dirX, dirY, gridSize, halfGrid, random, grid, cols, rows, strokeColor);
+            this.drawTrilhaAt(ctx, pt.c, pt.r, dirX, dirY, gridSize, halfGrid, random, grid, cols, rows, strokeColor);
         });
 
         for (let c = 0; c < cols; c++) {
@@ -495,44 +318,351 @@ class PcbBackground extends HTMLElement {
                 if (!grid[c][r] && random() < 0.08) {
                     const dirX = random() > 0.5 ? (random() > 0.5 ? 1 : -1) : 0;
                     const dirY = dirX === 0 ? (random() > 0.5 ? 1 : -1) : 0;
-
-                    svgElements += this.drawTrilhaAt(c, r, dirX, dirY, gridSize, halfGrid, random, grid, cols, rows, strokeColor);
+                    this.drawTrilhaAt(ctx, c, r, dirX, dirY, gridSize, halfGrid, random, grid, cols, rows, strokeColor);
                 }
             }
         }
-
-        return svgElements;
     }
 
-    isAreaFree(grid, c, r, wSlots, hSlots, cols, rows) {
-        for (let i = 0; i < wSlots; i++) {
-            for (let j = 0; j < hSlots; j++) {
-                if (c + i >= cols || r + j >= rows || grid[c + i][r + j]) {
-                    return false;
-                }
+    drawIntegratedCircuit(ctx, c, r, wSlots, hSlots, icType, strokeColor, random) {
+        const gridSize = this.gridSize;
+        const halfGrid = gridSize / 2;
+        const x = c * gridSize;
+        const y = r * gridSize;
+        const w = wSlots * gridSize;
+        const h = hSlots * gridSize;
+
+        const padMargin = 4;
+        const bodyX = x + padMargin;
+        const bodyY = y + padMargin;
+        const bodyW = w - (padMargin * 2);
+        const bodyH = h - (padMargin * 2);
+
+        ctx.save();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+
+        const pins = [];
+
+        for (let rowIdx = 0; rowIdx < hSlots; rowIdx++) {
+            const pinY = y + (rowIdx * gridSize) + halfGrid;
+            ctx.moveTo(x, pinY);
+            ctx.lineTo(bodyX, pinY);
+            ctx.moveTo(bodyX + bodyW, pinY);
+            ctx.lineTo(x + w, pinY);
+
+            pins.push({ x: bodyX, y: pinY });
+            pins.push({ x: bodyX + bodyW, y: pinY });
+
+            this.connectionPoints.push({ c: c, r: r + rowIdx });
+            this.connectionPoints.push({ c: c + wSlots - 1, r: r + rowIdx });
+        }
+
+        if (icType !== 0) {
+            for (let colIdx = 0; colIdx < wSlots; colIdx++) {
+                const pinX = x + (colIdx * gridSize) + halfGrid;
+                ctx.moveTo(pinX, y);
+                ctx.lineTo(pinX, bodyY);
+                ctx.moveTo(pinX, bodyY + bodyH);
+                ctx.lineTo(pinX, y + h);
+
+                pins.push({ x: pinX, y: bodyY });
+                pins.push({ x: pinX, y: bodyY + bodyH });
+
+                this.connectionPoints.push({ c: c + colIdx, r: r });
+                this.connectionPoints.push({ c: c + colIdx, r: r + hSlots - 1 });
             }
         }
-        return true;
-    }
+        ctx.stroke();
 
-    occupyArea(grid, c, r, wSlots, hSlots) {
-        for (let i = 0; i < wSlots; i++) {
-            for (let j = 0; j < hSlots; j++) {
-                grid[c + i][r + j] = true;
-            }
+        ctx.fillStyle = '#161b22';
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') ctx.roundRect(bodyX, bodyY, bodyW, bodyH, 2);
+        else ctx.rect(bodyX, bodyY, bodyW, bodyH);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = strokeColor;
+        ctx.beginPath();
+        ctx.arc(bodyX + 5, bodyY + 5, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (icType === 0) {
+            ctx.fillStyle = '#161b22';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(bodyX + (bodyW / 2), bodyY, 3, 0, Math.PI, false);
+            ctx.fill();
+            ctx.stroke();
         }
+
+        this.animatedIcs.push({
+            pins: pins,
+            pulseTime: random() * 100,
+            pulseSpeed: 0.03 + random() * 0.05
+        });
+
+        ctx.restore();
     }
 
-    drawTrilhaAt(startC, startR, dirX, dirY, gridSize, halfGrid, random, grid, cols, rows, strokeColor) {
-        const totalSteps = Math.floor(random() * 6) + 3; 
-        
+    drawHeaderPins(ctx, c, r, pinCount, strokeColor) {
+        const gridSize = this.gridSize;
+        const halfGrid = gridSize / 2;
+
+        ctx.save();
+        for (let p = 0; p < pinCount; p++) {
+            const px = (c + p) * gridSize + halfGrid;
+            const py = r * gridSize + halfGrid;
+
+            ctx.fillStyle = '#161b22';
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 1;
+            ctx.fillRect(px - 4, py - 4, 8, 8);
+            ctx.strokeRect(px - 4, py - 4, 8, 8);
+
+            ctx.fillStyle = strokeColor;
+            ctx.beginPath();
+            ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            this.connectionPoints.push({ c: c + p, r: r });
+        }
+        ctx.restore();
+    }
+
+    drawDipSwitch(ctx, c, r, switchSlots, random, strokeColor) {
+        const gridSize = this.gridSize;
+        const startX = c * gridSize;
+        const startY = r * gridSize;
+        const w = switchSlots * gridSize;
+        const h = 2 * gridSize;
+
+        ctx.save();
+        ctx.fillStyle = '#161b22';
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.2;
+
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') ctx.roundRect(startX + 2, startY + 2, w - 4, h - 4, 2);
+        else ctx.rect(startX + 2, startY + 2, w - 4, h - 4);
+        ctx.fill();
+        ctx.stroke();
+
+        for (let s = 0; s < switchSlots; s++) {
+            const swX = startX + (s * gridSize) + 5;
+            const isOn = random() > 0.5;
+
+            ctx.fillStyle = '#0b0f19';
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 0.8;
+            ctx.fillRect(swX, startY + 6, 10, 28);
+            ctx.strokeRect(swX, startY + 6, 10, 28);
+
+            ctx.fillStyle = strokeColor;
+            const knobY = isOn ? startY + 8 : startY + 20;
+            ctx.fillRect(swX + 2, knobY, 6, 10);
+
+            this.connectionPoints.push({ c: c + s, r: r });
+            this.connectionPoints.push({ c: c + s, r: r + 1 });
+        }
+        ctx.restore();
+    }
+
+    drawTransistorSot23(ctx, c, r, strokeColor) {
+        const gridSize = this.gridSize;
+        const halfGrid = gridSize / 2;
+        const startX = c * gridSize + halfGrid;
+        const startY = r * gridSize + halfGrid;
+
+        ctx.save();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.2;
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY - 6);
+        ctx.lineTo(startX, startY + 6);
+        ctx.moveTo(startX + 12, startY);
+        ctx.lineTo(startX + 20, startY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#161b22';
+        ctx.fillRect(startX - 3, startY - 8, 10, 16);
+        ctx.strokeRect(startX - 3, startY - 8, 10, 16);
+
+        ctx.fillStyle = strokeColor;
+        ctx.globalAlpha = 0.7;
+        ctx.fillRect(startX + 7, startY - 5, 3, 10);
+
+        this.connectionPoints.push({ c: c, r: r });
+        this.connectionPoints.push({ c: c + 1, r: r });
+        ctx.restore();
+    }
+
+    drawLedSmd(ctx, c, r, isHorizontal, strokeColor, random) {
+        const gridSize = this.gridSize;
+        const halfGrid = gridSize / 2;
+        const startX = c * gridSize + halfGrid;
+        const startY = r * gridSize + halfGrid;
+        const wSlots = isHorizontal ? 2 : 1;
+        const hSlots = isHorizontal ? 1 : 2;
+        const endX = (c + wSlots - 1) * gridSize + halfGrid;
+        const endY = (r + hSlots - 1) * gridSize + halfGrid;
+
+        ctx.save();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.2;
+
+        let chipX, chipY;
+
+        if (isHorizontal) {
+            const midX = (startX + endX) / 2;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(midX - 7, startY);
+            ctx.moveTo(midX + 7, startY);
+            ctx.lineTo(endX, startY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#161b22';
+            ctx.fillRect(midX - 7, startY - 4, 14, 8);
+            ctx.strokeRect(midX - 7, startY - 4, 14, 8);
+
+            ctx.fillStyle = strokeColor;
+            ctx.globalAlpha = 0.6;
+            ctx.fillRect(midX - 7, startY - 4, 3, 8);
+            ctx.fillRect(midX + 4, startY - 4, 3, 8);
+
+            chipX = midX - 2.5;
+            chipY = startY - 2.5;
+        } else {
+            const midY = (startY + endY) / 2;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX, midY - 7);
+            ctx.moveTo(startX, midY + 7);
+            ctx.lineTo(startX, endY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#161b22';
+            ctx.fillRect(startX - 4, midY - 7, 8, 14);
+            ctx.strokeRect(startX - 4, midY - 7, 8, 14);
+
+            ctx.fillStyle = strokeColor;
+            ctx.globalAlpha = 0.6;
+            ctx.fillRect(startX - 4, midY - 7, 8, 3);
+            ctx.fillRect(startX - 4, midY + 4, 8, 3);
+
+            chipX = startX - 2.5;
+            chipY = midY - 2.5;
+        }
+
+        this.animatedLeds.push({
+            x: chipX,
+            y: chipY,
+            speed: 0.02 + random() * 0.04,
+            phase: random() * Math.PI * 2
+        });
+
+        this.connectionPoints.push({ c: c, r: r });
+        this.connectionPoints.push({ c: c + (isHorizontal ? 1 : 0), r: r + (isHorizontal ? 0 : 1) });
+        ctx.restore();
+    }
+
+    drawCapacitorSmd(ctx, c, r, isHorizontal, strokeColor) {
+        const gridSize = this.gridSize;
+        const halfGrid = gridSize / 2;
+        const startX = c * gridSize + halfGrid;
+        const startY = r * gridSize + halfGrid;
+        const wSlots = isHorizontal ? 2 : 1;
+        const hSlots = isHorizontal ? 1 : 2;
+        const endX = (c + wSlots - 1) * gridSize + halfGrid;
+        const endY = (r + hSlots - 1) * gridSize + halfGrid;
+
+        ctx.save();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.2;
+
+        if (isHorizontal) {
+            const midX = (startX + endX) / 2;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, startY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#161b22';
+            ctx.fillRect(midX - 6, startY - 4, 12, 8);
+            ctx.strokeRect(midX - 6, startY - 4, 12, 8);
+
+            ctx.fillStyle = strokeColor;
+            ctx.globalAlpha = 0.7;
+            ctx.fillRect(midX - 6, startY - 4, 3.5, 8);
+            ctx.fillRect(midX + 2.5, startY - 4, 3.5, 8);
+        } else {
+            const midY = (startY + endY) / 2;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX, endY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#161b22';
+            ctx.fillRect(startX - 4, midY - 6, 8, 12);
+            ctx.strokeRect(startX - 4, midY - 6, 8, 12);
+
+            ctx.fillStyle = strokeColor;
+            ctx.globalAlpha = 0.7;
+            ctx.fillRect(startX - 4, midY - 6, 8, 3.5);
+            ctx.fillRect(startX - 4, midY + 2.5, 8, 3.5);
+        }
+
+        this.connectionPoints.push({ c: c, r: r });
+        this.connectionPoints.push({ c: c + (isHorizontal ? 1 : 0), r: r + (isHorizontal ? 0 : 1) });
+        ctx.restore();
+    }
+
+    drawCrystalOscillator(ctx, c, r, strokeColor) {
+        const gridSize = this.gridSize;
+        const halfGrid = gridSize / 2;
+        const startX = c * gridSize + halfGrid;
+        const startY = r * gridSize + halfGrid;
+        const endX = (c + 1) * gridSize + halfGrid;
+        const midX = (startX + endX) / 2;
+
+        ctx.save();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.2;
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, startY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#161b22';
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') ctx.roundRect(midX - 10, startY - 6, 20, 12, 5);
+        else ctx.rect(midX - 10, startY - 6, 20, 12);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(midX - 6, startY - 3);
+        ctx.lineTo(midX - 6, startY + 3);
+        ctx.moveTo(midX + 6, startY - 3);
+        ctx.lineTo(midX + 6, startY + 3);
+        ctx.stroke();
+
+        this.connectionPoints.push({ c: c, r: r });
+        this.connectionPoints.push({ c: c + 1, r: r });
+        ctx.restore();
+    }
+
+    drawTrilhaAt(ctx, startC, startR, dirX, dirY, gridSize, halfGrid, random, grid, cols, rows, strokeColor) {
+        const totalSteps = Math.floor(random() * 6) + 3;
         let curC = startC;
         let curR = startR;
-        
-        const startX = curC * gridSize + halfGrid;
-        const startY = curR * gridSize + halfGrid;
-        
-        let pathD = `M ${startX} ${startY}`;
+
+        const gridPath = [{ c: curC, r: curR }];
         let stepsWalked = 0;
 
         for (let i = 0; i < totalSteps; i++) {
@@ -543,11 +673,8 @@ class PcbBackground extends HTMLElement {
                 curC = nextC;
                 curR = nextR;
                 grid[curC][curR] = true;
-                
-                const nextX = curC * gridSize + halfGrid;
-                const nextY = curR * gridSize + halfGrid;
-                
-                pathD += ` L ${nextX} ${nextY}`;
+
+                gridPath.push({ c: curC, r: curR });
                 stepsWalked++;
 
                 if (random() < 0.35) {
@@ -564,37 +691,337 @@ class PcbBackground extends HTMLElement {
             }
         }
 
-        if (stepsWalked === 0) return '';
+        if (stepsWalked === 0) return;
 
-        let elements = `<path d="${pathD}" opacity="0.6" />`;
+        const renderPoints = [];
+        const chamfer = 5;
 
-        if (random() < 0.35) {
-            const flowDuration = (random() * 1.5 + 1).toFixed(2);
-            const isReverse = random() > 0.5;
-            
-            elements += `
-                <path d="${pathD}" 
-                      class="trilha-flow" 
-                      stroke="${strokeColor}" 
-                      stroke-width="1.4" 
-                      stroke-opacity="0.9" 
-                      style="animation-duration: ${flowDuration}s; ${isReverse ? 'animation-direction: reverse;' : ''}" />
-            `;
+        for (let i = 0; i < gridPath.length; i++) {
+            const px = gridPath[i].c * gridSize + halfGrid;
+            const py = gridPath[i].r * gridSize + halfGrid;
+
+            if (i === 0 || i === gridPath.length - 1) {
+                renderPoints.push({ x: px, y: py });
+            } else {
+                const prevPx = gridPath[i - 1].c * gridSize + halfGrid;
+                const prevPy = gridPath[i - 1].r * gridSize + halfGrid;
+                const nextPx = gridPath[i + 1].c * gridSize + halfGrid;
+                const nextPy = gridPath[i + 1].r * gridSize + halfGrid;
+
+                const dirInX = Math.sign(px - prevPx);
+                const dirInY = Math.sign(py - prevPy);
+                const dirOutX = Math.sign(nextPx - px);
+                const dirOutY = Math.sign(nextPy - py);
+
+                if (dirInX !== dirOutX || dirInY !== dirOutY) {
+                    renderPoints.push({
+                        x: px - dirInX * chamfer,
+                        y: py - dirInY * chamfer
+                    });
+                    renderPoints.push({
+                        x: px + dirOutX * chamfer,
+                        y: py + dirOutY * chamfer
+                    });
+                } else {
+                    renderPoints.push({ x: px, y: py });
+                }
+            }
         }
 
-        const finalX = curC * gridSize + halfGrid;
-        const finalY = curR * gridSize + halfGrid;
+        ctx.save();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.2;
+        ctx.globalAlpha = 0.6;
+
+        ctx.beginPath();
+        ctx.moveTo(renderPoints[0].x, renderPoints[0].y);
+        for (let p = 1; p < renderPoints.length; p++) {
+            ctx.lineTo(renderPoints[p].x, renderPoints[p].y);
+        }
+        ctx.stroke();
+
+        const finalPt = renderPoints[renderPoints.length - 1];
+        ctx.fillStyle = strokeColor;
 
         if (random() < 0.3) {
-            elements += `
-                <circle cx="${finalX}" cy="${finalY}" r="3" fill="none" stroke="${strokeColor}" stroke-width="0.8" opacity="0.8" />
-                <circle cx="${finalX}" cy="${finalY}" r="1" fill="${strokeColor}" stroke="none" />
-            `;
+            ctx.globalAlpha = 0.8;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.arc(finalPt.x, finalPt.y, 3, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.globalAlpha = 1.0;
+            ctx.beginPath();
+            ctx.arc(finalPt.x, finalPt.y, 1, 0, Math.PI * 2);
+            ctx.fill();
         } else {
-            elements += `<circle cx="${finalX}" cy="${finalY}" r="1.8" fill="${strokeColor}" stroke="none" />`;
+            ctx.globalAlpha = 1.0;
+            ctx.beginPath();
+            ctx.arc(finalPt.x, finalPt.y, 1.8, 0, Math.PI * 2);
+            ctx.fill();
         }
 
-        return elements;
+        ctx.restore();
+
+        // -------------------------------------------------------------
+        // PREPARAÇÃO PRECISA DO RASTRO PARA ANIMAÇÃO
+        // -------------------------------------------------------------
+        if (random() < 0.45 && renderPoints.length >= 2) {
+            let totalLength = 0;
+            const segments = [];
+
+            for (let i = 1; i < renderPoints.length; i++) {
+                const p1 = renderPoints[i - 1];
+                const p2 = renderPoints[i];
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const len = Math.hypot(dx, dy);
+
+                if (len > 0) {
+                    segments.push({ p1, p2, dx, dy, len, startDist: totalLength });
+                    totalLength += len;
+                }
+            }
+
+            if (totalLength > 10) {
+                this.animatedTraces.push({
+                    segments,
+                    totalLength,
+                    progress: random(),
+                    speed: 0.8 + random() * 1.2, // Pixels por frame
+                    isReverse: random() > 0.5
+                });
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // LOOP DE ANIMAÇÃO DINÂMICA
+    // -----------------------------------------------------------------
+    startAnimationLoop() {
+        const loop = (timestamp) => {
+            this.updateFps(timestamp);
+            this.renderDynamicLayer();
+            this.animFrameId = requestAnimationFrame(loop);
+        };
+        this.animFrameId = requestAnimationFrame(loop);
+    }
+
+    stopAnimationLoop() {
+        if (this.animFrameId) {
+            cancelAnimationFrame(this.animFrameId);
+            this.animFrameId = null;
+        }
+    }
+
+    updateFps(now) {
+        this.frameCount++;
+        if (now - this.fpsLastUpdate >= 500) {
+            this.fps = Math.round((this.frameCount * 1000) / (now - this.fpsLastUpdate));
+            this.frameCount = 0;
+            this.fpsLastUpdate = now;
+        }
+    }
+
+    renderDynamicLayer() {
+        const ctx = this.ctxAnim;
+        const width = this.width;
+        const height = this.height;
+        const strokeColor = this.getResolvedColor();
+
+        ctx.clearRect(0, 0, width, height);
+
+        // 1. Pulso Elétrico Fluido nas Trilhas
+        this.animateTraceFlows(ctx, strokeColor);
+
+        // 2. Piscar de LEDs SMD
+        this.animateLeds(ctx, strokeColor);
+
+        // 3. Atividade nos CIs
+        this.animateIcPulses(ctx, strokeColor);
+
+        // 4. DevMode
+        if (this.devmode) {
+            this.renderDevGrid(ctx, width, height);
+            this.renderDevFps(ctx, height);
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // SISTEMA DE PARTÍCULAS / FLUXO DE ENERGIA CORRIGIDO
+    // -----------------------------------------------------------------
+    animateTraceFlows(ctx, strokeColor) {
+        ctx.save();
+
+        this.animatedTraces.forEach(trace => {
+            // Avança a posição em pixels
+            trace.progress += trace.speed;
+            if (trace.progress > trace.totalLength) {
+                trace.progress = 0;
+            }
+
+            const currentDist = trace.isReverse ? trace.totalLength - trace.progress : trace.progress;
+            const head = this.getPointAtDistance(trace.segments, currentDist);
+
+            if (!head) return;
+
+            // Desenha a cabeça brilhante (Elétron/Sinal)
+            ctx.fillStyle = strokeColor;
+            ctx.globalAlpha = 0.9;
+            ctx.beginPath();
+            ctx.arc(head.x, head.y, 1.8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Desenha o rastro suave
+            const tailLength = Math.min(18, trace.totalLength * 0.4);
+            const numTailDots = 5;
+
+            for (let i = 1; i <= numTailDots; i++) {
+                const offset = (i / numTailDots) * tailLength;
+                const tailDist = trace.isReverse ? currentDist + offset : currentDist - offset;
+
+                if (tailDist >= 0 && tailDist <= trace.totalLength) {
+                    const tailPt = this.getPointAtDistance(trace.segments, tailDist);
+                    if (tailPt) {
+                        ctx.globalAlpha = 0.8 * (1 - i / numTailDots);
+                        ctx.beginPath();
+                        ctx.arc(tailPt.x, tailPt.y, 1.4 * (1 - (i / numTailDots) * 0.4), 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+        });
+
+        ctx.restore();
+    }
+
+    getPointAtDistance(segments, dist) {
+        if (dist <= 0) return { x: segments[0].p1.x, y: segments[0].p1.y };
+
+        for (let i = 0; i < segments.length; i++) {
+            const seg = segments[i];
+            if (dist <= seg.startDist + seg.len) {
+                const segRatio = (dist - seg.startDist) / seg.len;
+                return {
+                    x: seg.p1.x + seg.dx * segRatio,
+                    y: seg.p1.y + seg.dy * segRatio
+                };
+            }
+        }
+
+        const lastSeg = segments[segments.length - 1];
+        return { x: lastSeg.p2.x, y: lastSeg.p2.y };
+    }
+
+    animateLeds(ctx, strokeColor) {
+        ctx.save();
+
+        this.animatedLeds.forEach(led => {
+            led.phase += led.speed;
+            const opacity = (Math.sin(led.phase) + 1) / 2;
+
+            if (opacity > 0.05) {
+                ctx.fillStyle = strokeColor;
+                ctx.globalAlpha = opacity;
+                ctx.fillRect(led.x, led.y, 5, 5);
+
+                if (opacity > 0.5) {
+                    ctx.beginPath();
+                    ctx.arc(led.x + 2.5, led.y + 2.5, 5, 0, Math.PI * 2);
+                    ctx.globalAlpha = (opacity - 0.5) * 0.3;
+                    ctx.fill();
+                }
+            }
+        });
+
+        ctx.restore();
+    }
+
+    animateIcPulses(ctx, strokeColor) {
+        ctx.save();
+        ctx.fillStyle = strokeColor;
+
+        this.animatedIcs.forEach(ic => {
+            ic.pulseTime += ic.pulseSpeed;
+            const activePinIndex = Math.floor(ic.pulseTime) % ic.pins.length;
+
+            if (Math.sin(ic.pulseTime * 5) > 0.2) {
+                const pin = ic.pins[activePinIndex];
+                ctx.globalAlpha = 0.8;
+                ctx.beginPath();
+                ctx.arc(pin.x, pin.y, 1.6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+
+        ctx.restore();
+    }
+
+    // -----------------------------------------------------------------
+    // DEV MODE OVERLAY
+    // -----------------------------------------------------------------
+    renderDevGrid(ctx, width, height) {
+        const gridSize = this.gridSize;
+        const cols = Math.floor(width / gridSize);
+        const rows = Math.floor(height / gridSize);
+
+        ctx.save();
+        ctx.strokeStyle = '#ff0055';
+        ctx.fillStyle = '#ff0055';
+        ctx.lineWidth = 0.7;
+        ctx.globalAlpha = 0.35;
+        ctx.font = '8px monospace';
+
+        for (let c = 0; c <= cols; c++) {
+            const x = c * gridSize;
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+
+            if (c % 2 === 0) {
+                ctx.fillText(`C${c}`, x + 2, 9);
+            }
+        }
+
+        for (let r = 0; r <= rows; r++) {
+            const y = r * gridSize;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+
+            if (r % 2 === 0) {
+                ctx.fillText(`R${r}`, 2, y - 2);
+            }
+        }
+
+        ctx.restore();
+    }
+
+    renderDevFps(ctx, height) {
+        ctx.save();
+        
+        const x = 20;
+        const y = height / 2;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+        ctx.strokeStyle = '#ff0055';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(x, y - 20, 90, 40, 4);
+        } else {
+            ctx.rect(x, y - 20, 90, 40);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ff0055';
+        ctx.font = 'bold 12px monospace';
+        ctx.fillText(`FPS: ${this.fps}`, x + 12, y + 5);
+
+        ctx.restore();
     }
 }
 

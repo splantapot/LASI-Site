@@ -10,7 +10,10 @@ class ProjectTree extends HTMLElement {
                 <div class="project-tree__header">
                     <h2 class="project-tree__header-title">${title}</h2>
                 </div>
-                <div class="project-tree__body"></div>
+                <div class="project-tree__body">
+                    <div class="project-tree__body-left"></div>
+                    <div class="project-tree__body-right"></div>
+                </div>
                 <div class="project-tree__footer">
                     <h2 class="project-tree__footer-title">${footer}</h2>
                 </div>
@@ -18,6 +21,8 @@ class ProjectTree extends HTMLElement {
         `
 
         const treeBody = this.querySelector('.project-tree__body');
+        const bodyLeft = this.querySelector('.project-tree__body-left');
+        const bodyRight = this.querySelector('.project-tree__body-right');
         const hasProjectChild = children.some((child, i) => child.tagName.toLowerCase() == 'project-branch');
 
         if (children.length <= 0 || !hasProjectChild) {
@@ -29,9 +34,11 @@ class ProjectTree extends HTMLElement {
         }
 
         children.forEach((child, ix) => {
-            const positionClass = ix%2==0? 'project-tree__left' : 'project-tree__right';
-            child.classList.add(positionClass);
-            treeBody.appendChild(child);
+            if (ix % 2 == 0) {
+                bodyLeft.appendChild(child);
+            } else {
+                bodyRight.appendChild(child);
+            }
         });
     }
 }
@@ -63,62 +70,19 @@ class ProjectBranch extends HTMLElement {
                 link.title = `Acessar ${capitalize(key)}`;
 
                 link.innerHTML = MEDIA_ICONS[key];
+                
+                link.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                });
+
                 element.appendChild(link);
             }
         });
     }
 
-    connectedCallback() {
-        this.title = this.getAttribute('title') || '';
-        this.date = this.getAttribute('date') || '';
-        this.text = this.getAttribute('text') || '';
-
-        this.thumbnail = this.getAttribute('thumbnail') || undefined; // './assets/blank-thumbnail.png';
-
-        this.innerHTML = `
-            <div class="project-branch__container">
-                <!-- Thumbnail Inserted via JS -->
-                <div class="project-branch__content">
-                    <div class="project-branch__header">
-                        <div class="project-branch__title-wrapper">
-                            <h3 class="project-branch__title">${this.title}</h3>
-                        </div>
-                        <span class="project-branch__date">${this.date}</span>
-                    </div>
-                    <p class="project-branch__text">${this.text}</p>
-                    <div class="project-branch__footer">
-                        <h4  class="project-branch__details-text">Detalhes</h4>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        if (this.thumbnail) {
-            const divThumbnail = document.createElement('div');
-            divThumbnail.className = "project-branch__thumbnail-container"
-            
-            const imgThumbnail = document.createElement('img');
-            imgThumbnail.src = this.thumbnail;
-            imgThumbnail.alt = `Thumbnail for: ${this.title}`;
-            imgThumbnail.className = "project-branch__thumbnail";
-            
-            divThumbnail.appendChild(imgThumbnail);
-            this.querySelector('.project-branch__container').prepend(divThumbnail);
-        } else {
-            this.querySelector(".project-branch__text").classList.add("project-branch__long-text")
-        }
-
-        const titleWrapper = this.querySelector('.project-branch__title-wrapper');
-        this.renderShareIconsIn(titleWrapper)
-
-        // Add Button event
-        this.querySelector('.project-branch__footer')
-            .addEventListener('click', (e) => this.openDetailedView());
-    }
-
-    renderPresentation() {
+    renderPresentation(element) {
         this.presentation = undefined;
-        this.presentation_images = []
+        this.presentation_images = [];
         // Get all presentation images [Numbered from 1 to 10 (max)]
         for (let i = 1; i <= 10; i++) {
             const present = this.getAttribute(`img${i}`) || undefined;
@@ -137,7 +101,49 @@ class ProjectBranch extends HTMLElement {
                 slideshow.appendChild(sliderItem);
             });
             this.presentation = slideshow;
+            if (element) element.prepend(slideshow);
         }
+    }
+
+    connectedCallback() {
+        this.title = this.getAttribute('title') || '';
+        this.date = this.getAttribute('date') || '';
+        this.text = this.getAttribute('text') || '';
+
+        this.innerHTML = `
+            <div class="project-branch__container">
+                <!-- Thumbnail Inserted via JS -->
+                <div class="project-branch__content">
+                    <div class="project-branch__header">
+                        <div class="project-branch__title-wrapper">
+                            <h3 class="project-branch__title">${this.title}</h3>
+                        </div>
+                        <span class="project-branch__date">${this.date}</span>
+                    </div>
+
+                    <div class="project-branch__media-wrapper"></div>
+
+                    <p class="project-branch__text">${this.text}</p>
+                    <!--
+                    <div class="project-branch__footer">
+                        <h4  class="project-branch__details-text">Detalhes</h4>
+                    </div>
+                    -->
+                </div>
+            </div>
+        `;
+
+        const mediaWrapper = this.querySelector('.project-branch__media-wrapper');
+        this.renderShareIconsIn(mediaWrapper);
+
+        const branchContainer = this.querySelector(".project-branch__container");
+        this.renderPresentation(branchContainer);
+        if (!this.presentation) {
+            this.querySelector('.project-branch__text').classList.add('project-branch__long-text')
+        }
+
+        // Add Button event
+        this.addEventListener('click', (e) => this.openDetailedView());
     }
 
     openDetailedView() {
@@ -166,17 +172,11 @@ class ProjectBranch extends HTMLElement {
         const iconsWrapper = modal.querySelector('.project-branch__modal-icons-wrapper');
         this.renderShareIconsIn(iconsWrapper);
 
-        this.renderPresentation();
-        if (this.presentation) {
-            const sliderBox = document.createElement('div');
-            sliderBox.className = "project-branch__modal-slideshow";
-            sliderBox.appendChild(this.presentation);
-            modal.prepend(sliderBox);
-            // console.log(this.presentation)
-        }
+        this.renderPresentation(modal);
 
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
+
 
         // Fade in ---------------------------------------------
         requestAnimationFrame(() => {

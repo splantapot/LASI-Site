@@ -9,6 +9,7 @@ import Apresentacao from './models/Apresentacao.js';
 import Membro from './models/Membro.js';
 import Patrocinador from './models/Patrocinador.js';
 import Projeto from './models/Projeto.js';
+import Seletivo from './models/Seletivo.js';
 
 function createHtml(filename = null, data = null) {
     if (!filename || !data) return;
@@ -23,13 +24,7 @@ function createHtml(filename = null, data = null) {
     fs.writeFileSync(output_path, html_data);
 }
 
-function downloadPng(filename = null, property = null, url = null) {
-    if (!filename || !property || !data) return;
-
-
-}
-
-async function buildWebsite(data) {
+async function buildWebsite() {
     console.log("\n=== Starting Website building ===\n");
     deletePublic();
     copyPublicTemplate();
@@ -71,6 +66,15 @@ async function buildWebsite(data) {
         projetos.push(p);
     }
     console.log('> Projetos ok')
+
+    // Seletivos
+    const seletList = await Seletivo.fromSheet();
+    const seletivos = [];
+    for (const s of seletList) {
+        await s.downloadImage();
+        seletivos.push(s);
+    }
+    console.log('> Seletivos ok')
 
     // Render site ============================================================
 

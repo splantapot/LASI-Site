@@ -15,7 +15,8 @@ class Seletivo extends BaseModel {
 
     static async fromSheet() {
         const response = await super.fromSheet(SELETIVOS_SHEET_ID, ['Dados']);
-        return super.fromRows(response[0].slice(2) || [], Seletivo.FIELDS);
+        const list = super.fromRows(response[0].slice(2) || [], Seletivo.FIELDS);
+        return list.map((sel) => new Seletivo(sel));
     }
 
 }
