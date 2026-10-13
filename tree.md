@@ -27,7 +27,7 @@ __membros
 *Membro              ['nome', 'data_nascimento', 'foto', 'cargo', 'departamento', 'destacar', 'media'] + [medias]
 
 __seletivos
- Seletivo            ['titulo', 'data_inicio', 'data_fim', 'link_edital', 'link_resultado']
+*Seletivo            ['titulo', 'data_inicio', 'data_fim', 'link_edital', 'link_resultado']
 
 __noticias           
  Noticia             [... a definir] ['titulo', 'editor', 'data_publicacao', 'data_revisao', 'documento']

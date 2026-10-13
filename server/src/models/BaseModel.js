@@ -1,7 +1,12 @@
 import fetchFromSheets from "../fetch/fetchFromSheets.js";
+import fetchImage from "../fetch/fetchImage.js";
+import { formatName } from "../util/format.js";
+import { getDownloadLinkToID, getIDfromFileLink } from "../util/links.js";
 
 import formatMediaSheet from "../util/sheet.js";
 export { formatMediaSheet };
+
+import path from 'path';
 
 class BaseModel {
     confirmConfig(configFields, entityField) {
@@ -72,6 +77,27 @@ class BaseModel {
     // Get the data from the google sheets
     static async fromSheet(sheetID = "", sheets = []) {
         return await fetchFromSheets(sheetID, sheets);
+    }
+
+    // Downloads a File
+    async downloadImage(config = {
+            name_field: '',
+            img_field: '',
+            download_path: '',
+            import_path: ''
+        }) {
+        if (!config || !config.name_field || !config.img_field || config.ext) return;
+        const filename = `${formatName(this[config.name_field])}.png`;
+        const url = getDownloadLinkToID(getIDfromFileLink(this[config.img_field]));
+        const downloadSettings = {
+            output: path.join(config.download_path, filename),
+            url: url
+        }
+        await fetchImage(downloadSettings);
+        let importPath = config.import_path.trim();
+        if (!importPath.endsWith('/')) importPath = importPath + '/';
+        importPath = config.import_path + filename;
+        this[config.img_field] = importPath;
     }
 
     //  ========================

@@ -11,7 +11,7 @@ const __dirname = import.meta.dirname;
 // ========================================================
 // BUILD CONSTANTS
 // ========================================================
-const BUILD_PATH = path.join(__dirname, '..', 'build');
+const PUBLIC_PATH = path.join(__dirname, '..', 'public');
 
 const VIEWS_PATH = path.join(__dirname, '..', 'views');
 const TMP_PATH = path.join(VIEWS_PATH, 'templates');
@@ -21,7 +21,7 @@ const CSS_PATH = path.join(VIEWS_PATH, 'css');
 const JS_PATH = path.join(VIEWS_PATH, 'js');
 
 // exports
-export { BUILD_PATH, VIEWS_PATH, TMP_PATH, ASSETS_PATH, NEWS_PATH, CSS_PATH, JS_PATH};
+export { PUBLIC_PATH, VIEWS_PATH, TMP_PATH, ASSETS_PATH, NEWS_PATH, CSS_PATH, JS_PATH};
 
 // ========================================================
 // WEB CONSTANTS

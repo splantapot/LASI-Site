@@ -12,7 +12,9 @@ function getIDfromFileLink(url = "") {
 
     if (match) {
         const id = match[1];
+        return id;
     }
+    return undefined;
 }
 
 function getDownloadLinkToID(id = "") {

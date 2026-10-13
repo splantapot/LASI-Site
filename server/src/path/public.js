@@ -1,23 +1,17 @@
 import fs from 'fs';
 import path from 'path';
 
-import { ASSETS_PATH, CSS_PATH, JS_PATH, BUILD_PATH } from './../../config.js';
+import { ASSETS_PATH, CSS_PATH, JS_PATH, PUBLIC_PATH } from './../../config.js';
 
-/**
- * Deletes the "public" directory and all its contents.
- */
-function delete_public() {
+function deletePublic() {
     console.log('>> Deleting "public" folder...');
-    if (fs.existsSync(BUILD_PATH)) {
-        fs.rmSync(BUILD_PATH, { recursive: true });
+    if (fs.existsSync(PUBLIC_PATH)) {
+        fs.rmSync(PUBLIC_PATH, { recursive: true });
         console.log('Done!');
     }
 }
 
-/**
- * Creates a folder inside "public/assets" directory.
- */
-function create_in_assets(folder_name = null) {
+function createInAssets(folder_name = null) {
     console.log(`>> Creates "public/assets/${folder_name}" folder...`);
     const new_path = path.join(ASSETS_PATH, folder_name);
     if (!fs.existsSync(new_path)) {
@@ -27,12 +21,7 @@ function create_in_assets(folder_name = null) {
     return new_path;
 }
 
-/**
- * Copies a "src_path" folder to "out_path".
- * @param {string} src_path - The source path.
- * @param {string} out_path - The output path.
- */
-function copy_folder(src_path, out_path) {
+function copyFolder(src_path, out_path) {
     if (fs.existsSync(src_path)) {
         fs.cpSync(src_path, out_path, { recursive: true, force: true });
     } else {
@@ -40,25 +29,16 @@ function copy_folder(src_path, out_path) {
     }
 }
 
-/**
- * Copies the "views" subfolders and all its contents to "public"
- */
-function copy_view_to_public() {
-    console.log('>> Copying "views" folder...');
-    copy_folder(ASSETS_PATH, path.join(BUILD_PATH, 'assets'));
-    copy_folder(CSS_PATH, path.join(BUILD_PATH, 'css'));
-    copy_folder(JS_PATH, path.join(BUILD_PATH, 'js'));
+function copyPublicTemplate() {
+    console.log('>> Copying "views" folder as template to "public"...');
+    copyFolder(ASSETS_PATH, path.join(PUBLIC_PATH, 'assets'));
+    copyFolder(CSS_PATH, path.join(PUBLIC_PATH, 'css'));
+    copyFolder(JS_PATH, path.join(PUBLIC_PATH, 'js'));
     console.log('Done!');
 }
 
-/**
- * Get a path for output ".html" files in "public" directory. Creates if not exists.
- * 
- * @param {string} filename - Name of the file to be created (e.g., 'index.html', 'membros.json').
- * @returns {string} The full path for the output file.
- */
-function get_html_path(filename) {
-    const full_path = path.join(BUILD_PATH, filename);                    // Directory + filename
+function getHtmlPath(filename) {
+    const full_path = path.join(PUBLIC_PATH, filename);
     if (!fs.existsSync(path.dirname(full_path))) {
         fs.mkdirSync(path.dirname(full_path), { recursive: true });
     }
@@ -66,8 +46,8 @@ function get_html_path(filename) {
 }
 
 export {
-    delete_public, copy_folder,
-    create_in_assets,
-    copy_view_to_public,
-    get_html_path
+    deletePublic, copyFolder,
+    createInAssets,
+    copyPublicTemplate,
+    getHtmlPath
 }

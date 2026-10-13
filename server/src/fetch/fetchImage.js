@@ -10,8 +10,8 @@ async function fetchImage(config = {output: "", url: ""}) {
         fs.writeFileSync(config.output, Buffer.from(response.data));
         return true;
     } catch (err) {
-        console.error(`# FetchImgError: url=${config.url}`);
-        console.error(err);
+        console.error(`#### FetchImgError: url=${config.url}`);
+        // console.error(err);
         return false;
     }
 }
