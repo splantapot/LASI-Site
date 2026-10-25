@@ -30,7 +30,7 @@ class Projeto extends BaseModel {
     };
 
     static async fromSheet() {
-        const response = await super.fromSheet(PROJETOS_SHEET_ID, ['Dados', 'Media']);
+        const response = await super.fromSheet(PROJETOS_SHEET_ID, ['Dados', 'Mídia']);
         const sheetDados = response[0].slice(2)             || [];
         const sheetMedia = formatMediaSheet(response[1])    || [];
         return super.fromCombinedRows(sheetDados, Projeto.FIELDS, Projeto.CONFIG, sheetMedia);

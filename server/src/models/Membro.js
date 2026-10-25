@@ -23,7 +23,7 @@ class Membro extends BaseModel {
     }
 
     static async fromSheet() {
-        const response = await super.fromSheet(MEMBROS_SHEET_ID, ['Dados', 'Media']);
+        const response = await super.fromSheet(MEMBROS_SHEET_ID, ['Dados', 'Mídia']);
         const sheetDados = response[0].slice(2) || [];
         const sheetMedia = formatMediaSheet(response[1]) || [];
         const list = super.fromCombinedRows(sheetDados, Membro.FIELDS, Membro.CONFIG, sheetMedia) || [];

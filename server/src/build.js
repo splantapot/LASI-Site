@@ -9,7 +9,6 @@ import Apresentacao from './models/Apresentacao.js';
 import Membro from './models/Membro.js';
 import Patrocinador from './models/Patrocinador.js';
 import Projeto from './models/Projeto.js';
-import Seletivo from './models/Seletivo.js';
 
 function createHtml(filename = null, data = null) {
     if (!filename || !data) return;
@@ -67,21 +66,11 @@ async function buildWebsite() {
     }
     console.log('> Projetos ok')
 
-    // Seletivos
-    const seletList = await Seletivo.fromSheet();
-    const seletivos = [];
-    for (const s of seletList) {
-        await s.downloadImage();
-        seletivos.push(s);
-    }
-    console.log('> Seletivos ok')
-
     const APP_DATA = {
         apresentacoes: apresentacoes,
         membros: membros,
         patrocinadores: patrocinadores,
         projetos: projetos,
-        seletivos: seletivos
     }
 
     // Render site ============================================================
@@ -89,7 +78,6 @@ async function buildWebsite() {
     createHtml('index', APP_DATA);
     createHtml('projetos', APP_DATA);
     createHtml('membros', APP_DATA);
-    createHtml('seletivos', APP_DATA);
 
     // Done!
 

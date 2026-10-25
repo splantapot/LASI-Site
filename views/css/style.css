@@ -4,6 +4,8 @@
 /* https://www.joshwcomeau.com/gradient-generator/ */
 /* https://cssgradient.io/ */
 
+@import url('https://fonts.googleapis.com/css2?family=Michroma&display=swap');
+
 :root {
     /* --- FONTS --- */
     --font-michroma: 'Michroma', sans-serif;
