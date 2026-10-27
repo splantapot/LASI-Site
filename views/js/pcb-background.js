@@ -88,7 +88,7 @@ class PcbBackground extends HTMLElement {
                 overflow: hidden !important;
                 pointer-events: none !important;
                 display: block !important;
-                background-color: var(--shadow-cyan, #0a0d14);
+                background-color: var(--pcb-bg, #0a0d14);
             }
             canvas {
                 position: absolute;

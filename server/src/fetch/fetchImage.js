@@ -11,7 +11,7 @@ async function fetchImage(config = {output: "", url: ""}) {
         return true;
     } catch (err) {
         console.error(`#### FetchImgError: url=${config.url}`);
-        // console.error(err);
+        console.error(err);
         return false;
     }
 }

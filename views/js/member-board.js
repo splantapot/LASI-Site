@@ -120,6 +120,10 @@ class MemberCard extends HTMLElement {
                 link.className = 'member-card__media-icon';
                 link.title = `Acessar ${capitalize(key)}`;
 
+                // if (key == 'email') {
+                //     link.on
+                // }
+
                 link.innerHTML = MEDIA_ICONS[key];
                 element.appendChild(link);
 

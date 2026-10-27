@@ -101,7 +101,13 @@ class ProjectBranch extends HTMLElement {
                 slideshow.appendChild(sliderItem);
             });
             this.presentation = slideshow;
-            if (element) element.prepend(slideshow);
+
+            const container = document.createElement('div');
+            container.className = "project-branch__thumbnail-container";
+            container.appendChild(slideshow);
+
+            if (element) element.prepend(container);
+            if (element) console.log(slideshow);
         }
     }
 
@@ -151,7 +157,7 @@ class ProjectBranch extends HTMLElement {
         overlay.className = 'project-branch__modal-overlay';
         
         const modal = document.createElement('div');
-        modal.className = 'project-branch__modal-container';
+        modal.className = 'project-branch__modal-container'
 
         modal.innerHTML = `
             <!-- SLIDESHOW INSERTED VIA JS -->

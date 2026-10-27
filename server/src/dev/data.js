@@ -44,23 +44,61 @@ APP_DATA[Patrocinador.LIST_NAME] = [
 // Projetos -> Projetos
 APP_DATA[Projeto.LIST_NAME] = [
     new Projeto({
-        titulo: 'Projeto A',
-        data: "17 abs 2026",
+        titulo: 'Projeto 11',
+        data: "17 ago 2026",
         media: {email: "https://mail.google.com/", instagram:"https://instagram.com/lasi.ufpi", github:"https://github.com/LASI-UFPI", youtube:"https://youtube.com/@lasi-4908"},
-        img1: './assets/info/logomarca-lasi.png',
+        img1: './assets/info/box11.png',
         texto: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             Maecenas et tellus sed ipsum aliquet suscipit a at mi.
             Suspendisse lacus felis, consectetur in arcu non, elementum elementum odio.
             Nullam dictum risus nibh, et sodales nibh varius id.
-            Nullam dictum risus nibh, et sodales nibh varius id.
-            Nullam dictum risus nibh, et sodales nibh varius id.
-            Nullam dictum risus nibh, et sodales nibh varius id.
-            Nullam dictum risus nibh, et sodales nibh varius id.
-            Nullam dictum risus nibh, et sodales nibh varius id.
             Nam tempor, tortor et sagittis porta, orci purus cursus ligula, ut ullamcorper risus nulla in tellus. Morbi maximus massa suscipit, scelerisque nisl in, tincidunt elit.`
+    }).toJson(),
+    new Projeto({
+        titulo: 'Projeto 43 - Sistema de Automação',
+        data: "05 set 2026",
+        media: {github:"https://github.com/LASI-UFPI"},
+        img1: './assets/info/box43.png',
+        texto: `Desenvolvimento de um sistema de automação de baixo custo utilizando microcontroladores. 
+            O foco principal foi criar soluções acessíveis para o ambiente acadêmico, otimizando recursos energéticos.
+            Morbi maximus massa suscipit, scelerisque nisl in, tincidunt elit.`
+    }).toJson(),
+    new Projeto({
+        titulo: 'Projeto 96 - Robótica Educacional',
+        data: "22 out 2026",
+        media: {instagram:"https://instagram.com/lasi.ufpi", youtube:"https://youtube.com/@lasi-4908"},
+        img1: './assets/info/box96.png',
+        texto: `Iniciativa voltada para a introdução da robótica em escolas públicas da região. 
+            O projeto utilizou plataformas open-source para ensinar conceitos de lógica de programação e eletrônica básica para alunos do ensino médio.
+            Suspendisse lacus felis, consectetur in arcu non, elementum elementum odio.`
+    }).toJson(),
+    new Projeto({
+        titulo: 'Projeto D - Plataforma de Dados',
+        data: "12 nov 2026",
+        media: {email: "https://mail.google.com/", github:"https://github.com/LASI-UFPI"},
+        img1: './assets/info/box-projetos.png',
+        texto: `Implementação de um dashboard interativo para análise de dados do laboratório, centralizando as informações dos sensores espalhados pela universidade.
+            Nullam dictum risus nibh, et sodales nibh varius id. Nam tempor, tortor et sagittis porta.`
+    }).toJson(),
+    new Projeto({
+        titulo: 'Projeto E - Aplicativo de Mapeamento',
+        data: "01 dez 2026",
+        media: {instagram:"https://instagram.com/lasi.ufpi"},
+        img1: './assets/info/box-quiz.png',
+        texto: `Aplicativo móvel desenvolvido para mapear as salas e blocos da universidade, facilitando a navegação dos calouros.
+            Maecenas et tellus sed ipsum aliquet suscipit a at mi. Suspendisse lacus felis, consectetur in arcu non.`
+    }).toJson(),
+    new Projeto({
+        titulo: 'Projeto F - Impressora Braille Adaptada',
+        data: "15 jan 2027",
+        media: {youtube:"https://youtube.com/@lasi-4908", github:"https://github.com/LASI-UFPI"},
+        img1: './assets/info/box-acervo.png',
+        texto: `Adaptação de peças de impressoras tradicionais em conjunto com motores de passo para criação de uma impressora Braille de baixo custo, visando acessibilidade.
+            Nam tempor, tortor et sagittis porta, orci purus cursus ligula, ut ullamcorper risus nulla in tellus.`
     }).toJson()
 ];
 
+// Equipe -> Membros
 APP_DATA[Membro.LIST_NAME] = [
     new Membro({
         nome: "Ana Silva",
@@ -111,9 +149,22 @@ APP_DATA[Membro.LIST_NAME] = [
     })
 ];
 
-// Seletivos -> Seletivos
+// Seletivos -> Processos Seletivos
 APP_DATA[Seletivo.LIST_NAME] = [
-
-]
+    new Seletivo({
+        titulo: "Processo Seletivo 2026.2",
+        data_inicio: "10/08/2026",
+        data_fim: "30/08/2026",
+        status: "Encerrado",
+        link_edital: "#"
+    }).toJson(),
+    new Seletivo({
+        titulo: "Processo Seletivo 2027.1",
+        data_inicio: "15/02/2027",
+        data_fim: "10/03/2027",
+        status: "Aberto",
+        link_edital: "#"
+    }).toJson()
+];
 
 export default APP_DATA;

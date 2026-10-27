@@ -64,7 +64,7 @@ project-tree {
     width: 6px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1;
+    z-index: 10;
 }
 
 .project-tree__body::after {
@@ -87,7 +87,38 @@ project-tree {
     display: flex;
     flex-direction: column;
     gap: 70px;
+    width: 100%;
+    z-index: 1;
+    position: relative;
 }
+
+/* .project-tree__body-left::after {
+    content: '';
+    background-color: var(--pcb-bg);
+
+    position: absolute;
+    width: 100%;
+    height: calc(100% + 40px);
+    left: 10%;
+    top: 0;
+    transform: translate(0, -20px);
+    z-index: -1;
+    border-radius: 20px;
+}
+
+.project-tree__body-right::after {
+    content: '';
+    background-color: var(--pcb-bg);
+
+    position: absolute;
+    width: 100%;
+    height: calc(100% + 40px);
+    right: 10%;
+    top: 0;
+    transform: translate(0, -20px);
+    z-index: -1;
+    border-radius: 20px;
+} */
 
 .project-tree__body-right {
     padding-top: 10%;
@@ -109,19 +140,30 @@ project-tree {
     z-index: 4;
 }
 
+/* .project-tree__container::before {
+    content: '';
+    background-color: var(--pcb-bg);
+    border-radius: 50px;
+    width: 80%;
+    height: 100%;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+} */
+
 /* ===========================
 STYLES to PROJECT BRANCH
-=========================== */
+=========================== */ 
 
 project-branch {
-    display: flex;
-    width: 100%;
     position: relative;
-    z-index: 3;
 }
 
-.project-tree__body-left project-branch {
-    flex-shrink: 0;
+.project-branch__thumbnail-container {
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    background-color: var(--back-02);
 }
 
 .project-tree__body-left project-branch:nth-child(n)::after {
@@ -136,7 +178,7 @@ project-branch {
     border-top: 20px solid transparent;
     border-right: 15px solid var(--brand-yellow);
     border-bottom: 20px solid transparent;
-    right: -15%;
+    right: 5%;
 }
 
 .project-tree__body-right project-branch:nth-child(n)::after {
@@ -151,30 +193,33 @@ project-branch {
     border-top: 20px solid transparent;
     border-left: 15px solid var(--brand-yellow);
     border-bottom: 20px solid transparent;
-    left: -15%;
+    left: 5%;
 }
 
 .project-branch__container {
     background-color: var(--card-dark-color);
     border: 2px solid var(--brand-yellow);
-    /* border-radius: 8px; */
-    width: 100%;
-    max-width: 35vw;
-    min-height: 55vh; 
-    height: auto; 
+
+    width: 75%;
+    min-height: 150px;
     position: relative;
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    left: 50%;
+    transform: translate(-50%, 0);
+    
     display: flex;
     flex-direction: column;
     align-items: stretch;
     overflow: visible;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .project-branch__container:hover {
     border-color: var(--brand-yellow);
     box-shadow: 0 0 12px #ffe6004d;
-    transform: translateY(-3px);
+    transform: translate(-50%, -4px);
 }
+
+
 
 /* FORMATS */
 .project-branch__modal-header,
@@ -187,13 +232,13 @@ project-branch {
 
 .project-branch__title {
     font-family: var(--font-michroma);
-    font-size: var(--text-base, 1rem);
+    font-size: var(--text-md, 1.25rem);
     color: var(--white);
     margin: 0;
 }
 
 .project-branch__date {
-    font-size: var(--text-xs);
+    font-size: var(--text-base);
     color: var(--brand-yellow);
     font-weight: bold;
 }
@@ -209,7 +254,7 @@ project-branch {
     /* max-width: 80%; */
     gap: 8px;
 
-    --icon-size: 20px;
+    --icon-size: var(--text-md);
     /* max-height: calc(var(--icon-size) + 8px); */
     /* overflow: hidden; */
 }
@@ -238,26 +283,6 @@ project-branch {
     height: 100%;
     fill: currentColor;
     stroke: currentColor;
-}
-
-.project-branch__thumbnail-container {
-    width: 100%;
-    height: 130px;
-    overflow: hidden;
-    background-color: var(--back-02);
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-}
-
-.project-branch__thumbnail {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.project-branch__container:hover .project-branch__thumbnail {
-    transform: scale(1.05);
 }
 
 .project-branch__content {
