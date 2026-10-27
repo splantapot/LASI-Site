@@ -5,13 +5,16 @@ class NavigationBar extends HTMLElement {
         this.innerHTML = `
             <header class="nav-bar">
                 <div class="nav-bar__container">
-                    <div class="nav-bar__branding">
-                        <img class="nav-bar__logo" src="./assets/info/logo-lasi.png" alt="LASI Logo">
-                        
-                        <a href="/" class="nav-bar__title">
-                            LA<span class="nav-bar__title-highlight">SI</span>
-                        </a>
-                    </div>
+                    <a href="/">
+                        <div class="nav-bar__branding">
+                            <img class="nav-bar__logo" src="./assets/info/logo-lasi.png" alt="LASI Logo">
+                            <img class="nav-bar__name" src="./assets/info/nome-lasi.png" alt="LASI Nome">
+                            
+                            <!--<a href="/" class="nav-bar__title">
+                                L<span class="nav-bar__title-design">A</span><span class="nav-bar__title-highlight">SI</span>
+                            </a>-->
+                        </div>
+                    </a>
 
                     <nav class="nav-bar__links">
                         <a class="nav-bar__link" href="/">Início</a>

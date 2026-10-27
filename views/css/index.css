@@ -1,5 +1,5 @@
 .section__slideshow-box {
-    height: calc(91vh - var(--navbar-max-size));
+    height: calc(98vh - var(--navbar-max-size));
 }
 
 .section__about {
@@ -7,19 +7,25 @@
     margin: 10px;
 }
 
-.section__media,
 .section__sponsors {
     height: 220px;
 }
 
 /* More detailed */
 .section__infos {
-    height: 600px;
+    height: 670px;
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    padding: 10px;
+
+    /* background-color: var(--black-02); */
+
+    
+    /* -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%); */
 }
 
 .section__infos-title {
@@ -27,7 +33,8 @@
     font-weight: 700;
     color: var(--text-color);
     margin-bottom: 0.5rem;
-    font-family: var(--font-michroma);
+
+    letter-spacing: 2px;
 }
 
 .section__grid-container {
@@ -84,7 +91,7 @@
 }
 
 .section__grid-item.C {
-    background: url('../assets/info/box-noticia.png');
+    background: url('../assets/info/box-membros.png');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -104,7 +111,7 @@
     /* Based in 89 from https://getcssscan.com/css-buttons-examples */
     --b: 2px;   /* border thickness */
     --s: .3em; /* size of the corner */
-    --color: var(--neutral-light);
+    --color: var(--text-color);
 
     /* Font style */
     font-size: calc(var(--text-base) + 0.05rem);
@@ -140,4 +147,22 @@
 .section__grid-item a:active {
   background: var(--color);
   color: var(--color);
+}
+
+/* ==========================================
+   CONTEXTO GLOBAL E SEÇÃO (Ajuste se necessário)
+   ========================================== */
+body {
+  background-color: #0d0f14; /* Fundo escuro realça o efeito neon */
+  margin: 0;
+  font-family: sans-serif;
+}
+
+.section__media {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 40px;
+  flex-wrap: wrap;
 }

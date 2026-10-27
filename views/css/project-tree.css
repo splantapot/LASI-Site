@@ -19,10 +19,11 @@ project-tree {
 }
 
 .project-tree__header-title {
-    font-family: var(--font-michroma);
+    font-family: var(--font-logo);
     font-size: var(--text-lg);
+    letter-spacing: 5px;
     z-index: 4;
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: var(--black-01);
     padding: 10px;
     width: 90vw;
     border-radius: 50%;
@@ -30,13 +31,13 @@ project-tree {
 }
 
 .project-tree__no-project-label {
-    font-family: var(--font-michroma);
+    font-family: var(--font-title);
     font-size: var(--text-base);
     z-index: 4;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background-color: var(--shadow-cyan); 
+    background-color: var(--black-06); 
     padding: 10px 16px;
     border-radius: 4px;
 }
@@ -57,7 +58,7 @@ project-tree {
 .project-tree__body::before {
     content: '';
     position: absolute;
-    background-image: linear-gradient(to bottom, var(--brand-yellow), var(--shadow-yellow));
+    background-image: linear-gradient(to bottom, var(--brand-yellow), var(--brand-dark-yellow));
     top: 0;
     bottom: 20px;
     width: 6px;
@@ -154,9 +155,9 @@ project-branch {
 }
 
 .project-branch__container {
-    background-color: var(--shadow-bg);
+    background-color: var(--card-dark-color);
     border: 2px solid var(--brand-yellow);
-    border-radius: 8px;
+    /* border-radius: 8px; */
     width: 100%;
     max-width: 35vw;
     min-height: 55vh; 
@@ -171,7 +172,7 @@ project-branch {
 
 .project-branch__container:hover {
     border-color: var(--brand-yellow);
-    box-shadow: 0 0 15px rgba(255, 230, 0, 0.3);
+    box-shadow: 0 0 12px #ffe6004d;
     transform: translateY(-3px);
 }
 
@@ -243,7 +244,7 @@ project-branch {
     width: 100%;
     height: 130px;
     overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--back-02);
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
 }
@@ -309,15 +310,9 @@ project-branch {
                 color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.project-branch__footer:hover {
-    background-color: var(--yellow-light);
-    color: var(--shadow-bg); 
-}
-
 .project-branch__details-text {
     font-size: var(--text-sm);
     font-weight: 600;
-    /* Herda a cor do pai para que a transição de cor do texto funcione */
     color: inherit; 
 }
 
@@ -333,8 +328,8 @@ project-branch {
 
 .project-branch__modal-overlay {
     position: fixed;
-    inset: 0; /* Shortcut for top:0, right:0, bottom:0, left:0 */
-    background-color: var(--overlay-black); /* Semi-transparent black background */
+    inset: 0;
+    background-color: var(--black-09);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -354,7 +349,7 @@ project-branch {
 .project-branch__modal-container {
     height: 550px;
     width: 600px;
-    background-color: var(--shadow-bg);
+    background-color: var(--card-dark-color);
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
     border: 1px solid var(--brand-yellow);
@@ -418,7 +413,7 @@ project-branch {
 
 /* Fundo/trilho da barra de rolagem */
 .project-branch__modal-text-box::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--back-02);
     border-radius: 4px;
 }
 

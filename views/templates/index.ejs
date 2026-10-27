@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="./css/layout-components.css">
     <link rel="stylesheet" href="./css/slider-box.css">
     <link rel="stylesheet" href="./css/card-box.css">
-    
 </head>
 <body>
     <!-- todo: add intro -->
@@ -41,47 +40,50 @@
         <% } %>
 
         <section class="section__about" id="about">
-            <card-box title="Sobre Nós" subtitle="Conheça a essência e os objetivos do LASI">
+            <card-box title="Engenharia Aplicada" subtitle="Trabalhamos para integrar na prática diferentes conhecimentos da Engenharia." start>
                 <card-item
                     img="./assets/info/logo-lasi.png"
-                    title="Missão" 
+                    title="Eletrônica" 
                     text="Desenvolver pesquisas de ponta e soluções tecnológicas inovadoras, promovendo a integração entre a academia e o ecossistema digital."
                 ></card-item>
 
                 <card-item 
                     img="./assets/info/home.svg"
-                    title="Visão" 
+                    title="Visão Computacional" 
                     text="Ser referência nacional e internacional em inovação tecnológica, reconhecido pela excelência em projetos de impacto social e científico."
                 ></card-item>
 
                 <card-item 
-                    title="Valores" 
+                    title="Robótica" 
                     text="Ética na pesquisa, colaboração interdisciplinar, transparência nos resultados e compromisso contínuo com a evolução tecnológica."
                 ></card-item>
 
                 <card-item 
-                    title="Inovação" 
+                    title="Abrobrinha" 
                     text="Fomentar a criação de metodologias disruptivas e ferramentas avançadas que antecipem as demandas do mercado e da sociedade."
                 ></card-item>
 
                 <card-item 
-                    title="Impacto" 
+                    title="Meu Presidente" 
                     text="Transformar conhecimento acadêmico em soluções práticas que gerem valor real, desenvolvimento sustentável e melhoria na qualidade de vida."
                 ></card-item>
             </card-box>
         </section>
 
         <section class="section__infos">
-            <h2 class="section__infos-title">Um pouco mais...</h2>
+            <!-- <h2 class="section__infos-title">Um pouco mais...</h2> -->
             <div class="section__grid-container">
                 <div class="section__grid-item A">
                     <a href="/projetos">Conheça nossos projetos</a>
                 </div>
                 <div class="section__grid-item B">
-                    <a href="/quizes">Que tal um quiz? Confira!</a>
+                    <a href="/acervo#quizes">Que tal um quiz? Confira!</a>
                 </div>
+                <!-- <div class="section__grid-item C">
+                    <a href="/acervo#noticias">Mantenha-se informado</a>
+                </div> -->
                 <div class="section__grid-item C">
-                    <a href="/noticias">Mantenha-se informado</a>
+                    <a href="/membros">Quem somos</a>
                 </div>
                 <div class="section__grid-item D">
                     <a href="/acervo">Explore nosso acervo</a>
@@ -90,7 +92,18 @@
         </section>
 
         <section class="section__media" id="media">
-            <card-box title="Acompanhe nossas redes sociais" row>
+
+            <!-- <div class="media-card__container instagram">
+                <div class="media-card__icon"></div>
+            </div>
+            <div class="media-card__container github">
+                <div class="media-card__icon"></div>
+            </div>
+            <div class="media-card__container youtube">
+                <div class="media-card__icon"></div>
+            </div> -->
+
+            <card-box title="Descubra" row>
                 <card-item
                     media="instagram"
                     media-url="https://instagram.com/lasi.ufpi"
@@ -110,7 +123,7 @@
 
         <% if (typeof patrocinadores !== 'undefined' && patrocinadores && patrocinadores.length > 0) { %>
             <section class="section__sponsors">
-                <card-box title="Apoio" row>
+                <card-box title="Colaboradores" row>
                     <% patrocinadores.forEach(function(patrocinador) { %>
                         <card-item
                         <% if (patrocinador.logo) { %> logo="<%= patrocinador.logo %>" <% } %>
@@ -130,5 +143,16 @@
     <script src="./js/layout-components.js"></script>
     <script src="./js/slider-box.js"></script>
     <script src="./js/card-box.js"></script>
+
+    <script>
+        const mediaCards = document.querySelectorAll('.media-card__container');
+        mediaCards.forEach((card) => {
+            card.classList.forEach((cls) => {
+                if (MEDIA_ICONS[cls]) {
+                    card.querySelector('.media-card__icon').innerHTML = MEDIA_ICONS[cls];
+                }
+            });
+        });
+    </script>
 </body>
 </html>

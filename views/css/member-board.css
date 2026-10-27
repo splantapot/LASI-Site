@@ -74,22 +74,24 @@ member-board {
     /* width: 250px; */
     /* height: 360px; */
     /* background-color: var(--shadow-cyan); */
-    background-color: var(--darkest-bg);
+    background-color: var(--card-dark-gray);
     
     position: relative;
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 6fr 1fr 1fr 1fr;
+    grid-template-rows: 6fr 0.8fr 0.8fr 0.7fr;
     place-items: center;
 
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    padding-bottom: 5px;
 }
 
 .member-card__frame {
-    --ratio: 0.5;
+    --ratio: 0.4;
     width: calc(400px * var(--ratio));
     height: calc(400px * var(--ratio));
     margin: 15px 10px;
+    margin-bottom: 0;
 }
 
 .member-card__frame img {

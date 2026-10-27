@@ -30,13 +30,13 @@ slider-box {
 .slider__dot{
     width: 30px;
     height: 4px;
-    background: var(--off-dark-gray);
+    background: var(--white-025);
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .slider__shadow .slider__dot {
-    background: var(--off-gray);
+    background: var(--white-025);
 }
 
 .slider__dot.slider__active{
@@ -105,10 +105,12 @@ slider-item.slider__active .slider-item__container {
 }
 
 .slider-item__title {
-    font-family: var(--font-michroma), 'Michroma', sans-serif;
+    font-family: var(--font-logo);
+    font-weight: 100;
     font-size: var(--text-3x2l);
     line-height: 1.2;
     margin-bottom: 20px;
+    letter-spacing: 3px;
 }
 
 .slider-item__text {

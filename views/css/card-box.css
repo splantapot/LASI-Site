@@ -2,6 +2,19 @@
  * CSS para Card Box e Card Item (card-box.css) - Atualizado
  * ================================================================= */
 
+.card-box__container::before {
+    content: '';
+    width: 70%;
+    height: 2px;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    /* top: -1px; */
+    margin-top: -20px;
+    background: var(--white-04);
+    z-index: 100;
+}
+
 /* Container Principal do Card Box */
 .card-box__container {
     width: 100%;
@@ -15,24 +28,31 @@
 /* Cabeçalho do Card Box */
 .card-box__header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
 }
 
 .card-box__title {
-    font-size: var(--text-lg);
-    font-weight: 700;
+    font-size: var(--text-3x2l);
     color: var(--text-color);
     margin-bottom: 0.5rem;
-    font-family: var(--font-michroma);
+    font-family: var(--font-title);
+    font-weight: 300;
+}
+
+.card-box__title.start {
+    text-align: start;
 }
 
 .card-box__subtitle {
     font-size: var(--text-md);
     color: var(--text-muted);
     font-weight: 400;
+    font-family: var(--font-cabin);
 }
 
-/* --- DISPOSIÇÕES AUTOMÁTICAS (Layouts) --- */
+.card-box__subtitle.start {
+    text-align: start;
+}
 
 .card-box__grid {
     display: grid;
@@ -55,37 +75,38 @@
     margin: 0 auto;
 }
 
-/* --- Estilização do Card Item individual --- */
 card-item {
     display: flex;
 }
 
 .card-item__container {
-    background: var(--shadow-bg);
-    border: 1px solid var(--off-gray);
-    border-radius: 12px;
+    background: var(--card-dark-color);
+    border: 1px solid var(--card-dark-border-color);
+    /* border-radius: 12px; */
     padding: 2rem;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 0.1fr 1fr;
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* align-items: flex-start; */
     gap: 1.25rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 24px var(--black-04);
+    /* text-align: justify; */
 
-    /* Transição suave adicionando border-color */
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .card-item__container.card-item__container--no-img {
     justify-content: center;
+    grid-template-columns: 1fr;
 }
 
 /* Efeito interativo elegante ao passar o mouse */
 .card-item__container:hover {
     transform: translateY(-5px);
-    border-color: var(--blue-electric);
-    /* Sombra tridimensional aprimorada com um reflexo sutil em azul elétrico */
-    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 112, 255, 0.15);
+    border-color: var(--accent-blue);
+    box-shadow: 0 12px 30px -10px var(--black-06), 0 0 20px var(--card-dark-fade);
 }
 
 /* Ícone */
@@ -93,8 +114,8 @@ card-item {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
+    width: 45px;
+    height: 100%;
     background: transparent;
     border-radius: 8px;
     /* padding: 10px; */
@@ -116,19 +137,18 @@ card-item {
     padding: 10px;
     background: transparent;
     border-radius: 8px;
-    color: var(--blue-electric);
+    color: var(--accent-blue);
     
-    /* Prepara as propriedades para uma transição suave */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer; /* Garante o ponteiro de clique */
+    cursor: pointer;
 }
 
 .card-item__img--media:hover {
-    background: var(--blue-electric);
-    color: #ffffff; /* Ou a cor de ícone que preferir ao destacar */
-    transform: translateY(-4px) scale(1.05); /* Eleva e aumenta ligeiramente */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15), 
-                0 0 12px var(--blue-electric); /* Glow suave com a sua cor */
+    background: var(--accent-blue);
+    color: var(--white);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 20px var(--black-015), 
+                0 0 12px var(--accent-blue);
 }
 
 .card-item__img--media svg {
@@ -149,10 +169,9 @@ card-item {
     height: var(--img-size);
     padding: 10px;
     background: transparent;
-    
-    /* Prepara as propriedades para uma transição suave */
+
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer; /* Garante o ponteiro de clique */
+    cursor: pointer;
 }
 
 .card-item__img--square img,

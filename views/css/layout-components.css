@@ -8,10 +8,9 @@ navigation-bar {
 
 /* Style for navbar */
 .nav-bar {
-    background-color: var(--dark-bg);
+    background-color: var(--nav-dark-color);
     color: var(--text-muted);
     padding: 10px 12px;
-    font-family: var(--font-montserrat);
     border-bottom: 3px solid var(--brand-yellow);
 
     max-height: var(--navbar-max-size);
@@ -27,7 +26,6 @@ navigation-bar {
     padding-right: 25px;
 }
 
-/* Branding container */
 .nav-bar__branding {
     position: relative;
     display: inline-flex;
@@ -35,17 +33,31 @@ navigation-bar {
 }
 
 .nav-bar__logo {
-    height: 50px;
+    position: relative;
+    height: 45px;
     width: auto;
+    opacity: 0.35;
     display: block;
-    opacity: 0.70;
+}
+
+.nav-bar__name {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    opacity: 1;
+    z-index: 10;
 }
 
 /* Confiugurações do texto da logo */
 .nav-bar__title-highlight,
+.nav-bar__title-design,
 .nav-bar__title {
     font-size: var(--text-lg);
-    font-family: var(--font-michroma);
+    font-family: var(--font-logo);
     color: var(--text-color);
     text-decoration: none;
     white-space: nowrap;
@@ -66,7 +78,21 @@ navigation-bar {
 }
 
 .nav-bar__title-highlight {
-    color: var(--accent-yellow);
+    color: var(--brand-yellow);
+}
+
+/* Cria a bolinha no lugar do traço */
+.nav-bar__title-design::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 65%; /* Posiciona verticalmente onde ficaria o traço */
+    transform: translate(-50%, -50%);
+    width: 6px;       /* Tamanho da bolinha */
+    height: 6px;      /* Tamanho da bolinha */
+    background-color: #ffffff; /* Cor idêntica à letra */
+    border-radius: 50%; /* Transforma o quadrado em círculo */
+    z-index: 11;
 }
 
 /* Configuração da parte dos links */
@@ -79,6 +105,7 @@ navigation-bar {
 .nav-bar__link {
     color: var(--text-muted);
     font-size: var(--text-base);
+    font-family: var(--font-subtitle);
     text-decoration: none;
     transition: color 0.2s ease;
 }

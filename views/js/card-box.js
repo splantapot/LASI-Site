@@ -8,6 +8,7 @@ class CardBox extends HTMLElement {
         const row = this.hasAttribute('row') || undefined;
         const column = this.hasAttribute('column') || undefined;
 
+
         this.innerHTML = `
             <div class="card-box__container">
                 <div class="card-box__header">
@@ -17,6 +18,11 @@ class CardBox extends HTMLElement {
                 <div class="card-box__body"></div>
             </div>
         `;
+
+        if (this.hasAttribute('start')) {
+            this.querySelector('.card-box__title').classList.add('start');
+            this.querySelector('.card-box__subtitle').classList.add('start');
+        }
 
         const cardBoxBody = this.querySelector('.card-box__body');
         if (row) cardBoxBody.classList.add('card-box__row');

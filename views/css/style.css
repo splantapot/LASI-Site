@@ -4,11 +4,15 @@
 /* https://www.joshwcomeau.com/gradient-generator/ */
 /* https://cssgradient.io/ */
 
-@import url('https://fonts.googleapis.com/css2?family=Michroma&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&family=Michroma&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
     /* --- FONTS --- */
-    --font-michroma: 'Michroma', sans-serif;
+    --font-logo: 'Michroma', sans-serif;
+    /* --font-title: 'Montserrat', sans-serif; */
+    --font-title: "Raleway", sans-serif;
+    --font-body: "Cabin", sans-serif;
+    --font-body-old: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 
     /* --- TYPOGRAPHY SCALE (Base 16px nativa) --- */
     --text-xs:   0.75rem;   /* 12px - Legendas / Badges */
@@ -27,46 +31,46 @@
     --weight-bold:   700;
     
     /* --- TYPOGRAPHY & TEXT --- */
-    --text-color:       #f0f6fc; /* Off-white para textos em fundo escuro */
-    --text-muted:       #b1b5c9; /* Antigo azul-cinza-fraco (perfeito para subtítulos) */
-    --text-muted-hvr:   #d8dcf3; /* for hover */
-    --text-dark:        #1F242C; /* Cor base para textos escuros em elementos claros */
+    --text-color:       #f0f6fc;
+    --text-muted:       #b1b5c9;
+    --text-muted-hvr:   #d8dcf3;
+    --text-dark:        #1F242C;
 
     /* --- BRAND COLORS (Base) --- */
-    --brand-blue:       #04044c; /* Seu azul-escuro principal */
-    --brand-yellow:     #fccc06; /* Seu amarelo principal */
-    --blue-slate:       #5b6ba3; /* Antigo azul-cinza */
-    --yellow-light:     #fde47b; /* Antigo amarelo-fraco */
+    --brand-blue:       #04044c;
+    --brand-blue-posts: #020239;
+    --brand-yellow:     #fccc06;
+    --brand-dark-yellow: #c49c00;
+    --blue-slate:       #5b6ba3;
+    --yellow-light:     #fde47b;
 
-    /* --- CORES AUXILIARES (Base & Layout) --- */
-    --purple-deep:    #3F1C71; /* Roxo Profundo: Ótimo para detalhes escuros ou heros */
-    --accent-yellow:  #ffc400; /* Amarelo de Destaque: Para ícones, badges ou hover */
-    --shadow-yellow:  #cea500; /* Seu amarelo principal */
-    --shadow-cyan:    #0b0f19;    /* Seu amarelo principal */
-    --shadow-bg:      #161b22;
-    --dark-bg:        #24292e; /* Fundo Escuro: Para áreas de destaque ou rodapés */
-    --darkest-bg:        rgb(21, 21, 21); /* Fundo Escuro: Para áreas de destaque ou rodapés */
-    --neutral-light:  #E9ECEF; /* Cinza Claro: Fundo neutro, cards ou divisores */
-    --off-gray:       rgba(255, 255, 255, 0.2); /* Cinza ligeiramente transparente */
-    --off-dark-gray:  rgba(0, 0, 0, 0.4);
-    --overlay-black:  rgba(0,0,0, 0.6);
+    /* --- THEME COLORS --- */
+    --primary-dark-color: #0b1020;
+    --nav-dark-color:       #0b1020;
+    --card-dark-color:    #050510;
+    --card-dark-border-color: #1a1a25;
+    --card-dark-fade:   #0060ff1F;
+    --card-dark-gray:   #121218;
+    
+    --accent-blue:         #1A73E8;
 
-    /* --- CORES PADRÃO (Frequentemente úteis) --- */
+    --black-01: #0000001a;
+    --black-015: #00000026;
+    --black-02: #00000033;
+    --black-04: #00000066;
+    --black-06: #00000099;
+    --black-09: #000000e6;
     --black: #000000;
-    --white: #FFFFFF;
+
+    --white: #ffffff;
+    --white-025:   #ffffff40;
+    --white-04:   #ffffff66;
 
     /* --- CORES DE ACENTO VIBRANTES (Ações, Botões & Status) --- */
-    --blue-electric:  #1A73E8; /* Azul Elétrico: Links ou botões primários */
+    --blue-electric:  #; /* Azul Elétrico: Links ou botões primários */
     --cyan-vibrant:   #00FFFF; /* Ciano Vibrante: Hover de botões, bordas ativas ou neon */
     --orange-energy:  #FF7F00; /* Laranja Energia: Call-to-actions importantes ou alertas */
     --green-success:  #28A745; /* Verde Sucesso: Mensagens de confirmação e badges */
-
-    /* --- ESCALA AMARELO / LIMA (Gradientes & Destaques de Código) --- */
-    --lime-50:        #F7F702; /* Amarelo puro */
-    --lime-100:       #F7FF00; /* Amarelo limão brilhante */
-    --lime-200:       #E4F600; /* Amarelo ligeiramente esverdeado */
-    --lime-300:       #DDFF00; /* Chartreuse clássico */
-    --lime-400:       #C7F701; /* Verde lima suave */
 
     --navbar-max-size: 70px;
 }
@@ -76,7 +80,7 @@
     padding: 0;
     box-sizing: border-box;
     /* Colocar fonte padrão */
-    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-family: var(--font-body);
 }
 
 html {
@@ -86,8 +90,8 @@ html {
 }
 
 body {
-    /* Cor padrão de fundo */
-    background-image: linear-gradient(
+    /* Cor padrão de fundo BACKUP */
+    /* background-image: linear-gradient(
         to bottom,
         rgba(36, 41, 46, 0.35) 0%,
         rgba(21, 26, 33, 0.65) 20%,
@@ -95,7 +99,22 @@ body {
         rgba(12, 16, 22, 0.90) 70%,
         rgba(1, 4, 9, 0.98) 100%
     );
-    background-color: var(--black);
+    background-color: var(--black); */
+
+    background-image: linear-gradient(
+        to bottom,
+        /* #010409fa 100%,
+        #030016e6 70%,
+        #01061dcc 40%,
+        #050a21a6 20%, */
+        #14192e59 0%,
+        #050a21a6 20%,
+        #01061dcc 40%,
+        #030016e6 70%,
+        #010409fa 100%
+    );
+    background-color: #000010;
+
     background-attachment: fixed;
     background-size: cover;
 

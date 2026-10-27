@@ -2,8 +2,8 @@ class ProjectTree extends HTMLElement {
     connectedCallback() {
         const children = Array.from(this.children); // Obtém a lista dos projetos
 
-        const title = this.getAttribute('title') || 'Título';
-        const footer = this.getAttribute('footer') || 'Footer';
+        const title = this.getAttribute('title') || '';
+        const footer = this.getAttribute('footer') || '';
 
         this.innerHTML = `
             <div class="project-tree__container">
